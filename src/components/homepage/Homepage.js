@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import qs from 'query-string'
 import { getUserToken, validateToken } from '../../services/auth-service.js'
-import { loadInitialManifest, getS3Object } from '../../services/storage-service.js'
-import { List, ListItem } from '@material-ui/core'
+import { loadInitialManifest } from '../../services/storage-service.js'
 import history from '../../util/history'
+import FileList from '../filelist/FileList'
 
 export default function Homepage(props){
     const [devItems, setDevItems] = useState([])
@@ -44,36 +44,14 @@ export default function Homepage(props){
         }   
     }
 
-    const handleS3Response = (data, success) => {
-        if(success) {
-            console.log(data)
-        }
-    }
 
-    const regex = /.+?(?=\/)\/(.*)/
 
     return (
         <div align="center">
             <h1>Greetings, user. Here are your files.</h1>
-            <List
-                style={{
-                    paddingLeft: '20%',
-                    paddingRight: '20%'
-                }}>
-                {devItems.map((item, i) => {
-                    console.log(item.Key.match(regex))
-                    return (
-                        <ListItem
-                            button
-                            key={i}
-                            onClick={() => { 
-                                getS3Object(JSON.parse(localStorage.getItem("token")).id_token, item.Key, handleS3Response) 
-                                }}>
-                            {item.Key}
-                        </ListItem>
-                    )
-                })}
-            </List>
+                <FileList
+                    files={devItems}/>
+            
         </div>
     )
 }
