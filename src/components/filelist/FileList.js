@@ -1,55 +1,101 @@
-import React from 'react'
-import { List, ListItem } from '@material-ui/core'
-import { getS3Object } from '../../services/storage-service'
+import React, { useEffect } from 'react'
+import { List, ListItem, ListItemText, ListItemSecondaryAction, IconButton, makeStyles, Button } from '@material-ui/core'
+import { getS3Object, getManifest, getS3UploadURL } from '../../services/storage-service'
+import { SaveAlt } from '@material-ui/icons'
+import { connect } from 'react-redux'
+import { setManifest, setSelectedItem, setPreviousKey, setCurrentKey } from '../../redux/actions/manifest-actions'
+const useStyles = makeStyles({
+    listStyle: {
+        paddingLeft: '20%',
+        paddingRight: '20%'
+    }
+})
 
-export default function FileList(props) {
+const mapStateToProps = state => {
+    return {
+        manifest: state.manifest
+    }
+}
+
+const mapDispatchToProps = dispatch => {
+    return {
+        setManifest: (manifest) => dispatch(setManifest(manifest)),
+        setSelectedItem: (item) => dispatch(setSelectedItem(item)),
+        setPreviousKey: (key) => dispatch(setPreviousKey(key)),
+        setCurrentKey: (key) => dispatch(setCurrentKey(key))
+    }
+}
+
+function FileList(props) {
+    const classes = useStyles()
+
+    // useEffect(() => {
+    //     getS3UploadURL(JSON.parse(localStorage.getItem("token")).id_token, "EXAMPLE_KEY_ACCESS_DENIED", 
+    //         (data, success) => {
+
+    //         })
+    //     console.log(props.manifest)
+    // }, [])
 
     const handleS3Response = (data, success) => {
         if(success) {
-            console.log(data)
+            props.setManifest(data)
         }
     }
 
-    const regex = /.+?(?=\/)\/(.*)/
+    const handleS3DownloadResponse = (data, success) => {
+        if(success){
+            console.log('Successfully downloaded the object %O', data)
+        }
+    }
+    const onFolderClick = (prefix) => {
+        let token = JSON.parse(localStorage.getItem("token")).id_token
+        getManifest(prefix, token, handleS3Response)
+    }
+
 
     return (
         <div>
             <List
-                style={{
-                    paddingLeft: '20%',
-                    paddingRight: '20%'
-                }}>
-                {props.files.map((item, i) => {
-                    // console.log(item.Key.match(regex))
-                    return (
+                className={classes.listStyle}>
+                {props.manifest.files.map((item, i) => {
+                return (
                         <ListItem
                             button
                             key={i}
                             onClick={() => { 
-                                getS3Object(JSON.parse(localStorage.getItem("token")).id_token, item.Key, handleS3Response) 
-                                }}>
-                            {item.Key}
+                                if(item.isFolder) { 
+                                    props.setPreviousKey(props.manifest.currentKey)
+                                    props.setCurrentKey(item.Key)
+                                    onFolderClick(item.Key) 
+                                }
+                                else { props.setSelectedItem(item) }
+                            }}>
+                            <ListItemText>{item.Key}</ListItemText>
+                            <ListItemSecondaryAction>
+                                {item.isFolder == true?
+                                (
+                                    // <IconButton edge="end">
+                                    //     <Folder/>
+                                    // </IconButton>
+                                    <span/>
+                                ):(
+                                    <IconButton 
+                                        edge="end"
+                                        onClick={() => {
+                                            getS3Object(JSON.parse(localStorage.getItem("token")).id_token, item.Key, handleS3DownloadResponse)
+                                        }}>
+                                        <SaveAlt/>
+                                    </IconButton>
+                                )}
+                            </ListItemSecondaryAction>
                         </ListItem>
-                    )
-                })}
+                        )
+                    }
+                )}
             </List>
         </div>
     )
 }
 
-{/* <ListItem>
-<ListItemAvatar>
-<Avatar>
-<FolderIcon />
-</Avatar>
-</ListItemAvatar>
-<ListItemText
-primary="Single-line item"
-secondary={secondary ? 'Secondary text' : null}
-/>
-<ListItemSecondaryAction>
-<IconButton edge="end" aria-label="delete">
-<DeleteIcon />
-</IconButton>
-</ListItemSecondaryAction>
-</ListItem>, */}
+export default connect(mapStateToProps, mapDispatchToProps)(FileList)

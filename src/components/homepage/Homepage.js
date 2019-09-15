@@ -2,12 +2,27 @@ import React, { useEffect, useState } from 'react'
 import qs from 'query-string'
 import { getUserToken, validateToken } from '../../services/auth-service.js'
 import { loadInitialManifest } from '../../services/storage-service.js'
+import { setManifest, setPreviousKey, setCurrentKey } from '../../redux/actions/manifest-actions'
 import history from '../../util/history'
 import FileList from '../filelist/FileList'
+import { connect } from 'react-redux'
+import DetailsDrawer from '../detailsdrawer/DetailsDrawer'
 
-export default function Homepage(props){
-    const [devItems, setDevItems] = useState([])
+const mapStateToProps = state => {
+    return {
+        manifest: state.manifest
+    }
+}
 
+const mapDispatchToProps = dispatch => {
+    return {
+        setFiles: (files) => dispatch(setManifest(files)),
+        setPreviousKey: (key) => dispatch(setPreviousKey(key)),
+        setCurrentKey: (key) => dispatch(setCurrentKey(key))
+    }
+}
+
+function Homepage(props){
     useEffect(() => {
         if(!localStorage.getItem("token")) initialize()
         else {
@@ -23,6 +38,7 @@ export default function Homepage(props){
 
     const initialize = () => {
         let query = qs.parse(props.location.search)
+
         if(!query.code){
             history.push("/redirect?url=https://www.kioshq.com")
         } else {
@@ -34,13 +50,12 @@ export default function Homepage(props){
         }
     }
 
-    const handleManifestResponse = (manifest, success) => {
+    const handleManifestResponse = (files, success, key) => {
         if(success) {
-            console.log('Received data: %O', manifest)
-            console.log(manifest.Contents)
-            setDevItems(manifest.Contents)
+            props.setFiles(files)
+            props.setPreviousKey(key)
         } else {
-            console.error('Shit')
+            console.error('There was an error retrieving the data')
         }   
     }
 
@@ -49,9 +64,10 @@ export default function Homepage(props){
     return (
         <div align="center">
             <h1>Greetings, user. Here are your files.</h1>
-                <FileList
-                    files={devItems}/>
-            
+                <FileList/>
+            <DetailsDrawer/>
         </div>
     )
 }
+
+export default connect(mapStateToProps, mapDispatchToProps)(Homepage)
