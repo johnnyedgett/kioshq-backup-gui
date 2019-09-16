@@ -7,6 +7,7 @@ import history from '../../util/history'
 import FileList from '../filelist/FileList'
 import { connect } from 'react-redux'
 import DetailsDrawer from '../detailsdrawer/DetailsDrawer'
+import FileDropzone from '../filedropzone/FileDropzone'
 
 const mapStateToProps = state => {
     return {
@@ -23,6 +24,7 @@ const mapDispatchToProps = dispatch => {
 }
 
 function Homepage(props){
+    const [showFilezone, setShowFilezone] = useState(false)
     useEffect(() => {
         if(!localStorage.getItem("token")) initialize()
         else {
@@ -62,7 +64,8 @@ function Homepage(props){
 
 
     return (
-        <div align="center">
+        <div align="center" onDragOverCapture={() => setShowFilezone(true)} onDragExit={() => setShowFilezone(false)}>
+            {showFilezone?<FileDropzone/>:<span/>}
             <h1>Greetings, user. Here are your files.</h1>
                 <FileList/>
             <DetailsDrawer/>
