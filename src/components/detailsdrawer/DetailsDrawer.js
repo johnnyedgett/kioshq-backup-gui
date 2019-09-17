@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import { Drawer, Button, makeStyles } from '@material-ui/core'
 import isEmpty from 'lodash.isempty'
 import { connect } from 'react-redux'

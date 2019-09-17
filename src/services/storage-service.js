@@ -51,7 +51,8 @@ export const loadInitialManifest = (token, callback) => {
     })
 }
 
-export const getManifest = (prefix, token, callback) => {
+export const getManifest = (prefix, callback) => {
+    let token = JSON.parse(localStorage.getItem("token")).id_token
     if(!token) 
         callback(null, false)
     AWS.config.region = 'us-east-1'
@@ -72,13 +73,14 @@ export const getManifest = (prefix, token, callback) => {
                 Prefix: prefix,
                 Delimiter: '/'
             }
-            console.log('Params %O', params)
+            // console.log('Params %O', params)
             s3.listObjectsV2(params, (err, data) => {
                 if(err) {
                     console.error(err)
                     callback(null, false)
                 }
                 else {
+                    console.log(data)
                     let tmp = []
 
                     tmp = Object.assign([], data.Contents)

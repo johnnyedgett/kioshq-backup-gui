@@ -1,4 +1,4 @@
-import { SET_MANIFEST, SET_SELECTED_ITEM, SET_CURRENT_KEY, SET_PREVIOUS_KEY } from '../constants'
+import { SET_MANIFEST, SET_SELECTED_ITEM, SET_CURRENT_KEY, SET_PREVIOUS_KEY} from '../constants'
 
 const initialState = {
     files: [],
@@ -9,15 +9,15 @@ const initialState = {
 }
 
 export default function manifest(state = initialState, action) {
+    let tmp
     switch(action.type) {
         case SET_MANIFEST:
             // Pre-processing: check if the file is a folder or not
-            let tmp = Object.assign([], action.payload)
+            tmp = Object.assign([], action.payload)
             tmp.map((item) => {
                 const regex = /(.*)\/(.*)/
                 const matched = item.Key.match(regex)
                 item.isFolder = matched[matched.length-1] === ''?true:false
-                console.log(item.isFolder)
                 return item
             })
             return Object.assign({}, state, {

@@ -8,19 +8,20 @@ export const getUserToken = (code, callback) => {
             console.log(res)
             if(res.data.id_token){
                 localStorage.setItem('token', JSON.stringify(res.data))
-                console.log('token saved')
-                callback(res.data.id_token, true)
+                // console.log('token saved')
+                // res.data.id_token,
+                callback(true)
             }  
         })
         .catch(err => {
             console.log(err)
-            callback(null, false)
+            callback(false)
         })
 }
 
-export const validateToken = (jwt, callback) => {
-    let parsed = JSON.parse(jwt)
-    console.log('Going to check %O', parsed)
+export const validateToken = (callback) => {
+    if(!localStorage.getItem("token")) callback(false)
+    let parsed = JSON.parse(localStorage.getItem("token"))
     axios.get(`${URL}/auth/validate?code=${parsed.id_token}`, {
             headers: { 
                 "authorizationToken": parsed.id_token
@@ -29,10 +30,8 @@ export const validateToken = (jwt, callback) => {
         .then(res => {
             console.log(res)
             if(res.data){ 
-                console.log('token is valid and can stay')
                 callback(true)
             } else {
-                
                 localStorage.removeItem('token')
                 callback(false)
             }

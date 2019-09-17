@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import qs from 'query-string'
 import { getUserToken, validateToken } from '../../services/auth-service.js'
-import { loadInitialManifest } from '../../services/storage-service.js'
 import { setManifest, setPreviousKey, setCurrentKey } from '../../redux/actions/manifest-actions'
+import { pushKey, popKey } from '../../redux/actions/search-actions'
+import { setAuthenticated } from '../../redux/actions/auth-actions'
 import history from '../../util/history'
 import FileList from '../filelist/FileList'
 import { connect } from 'react-redux'
@@ -11,7 +12,8 @@ import FileDropzone from '../filedropzone/FileDropzone'
 
 const mapStateToProps = state => {
     return {
-        manifest: state.manifest
+        manifest: state.manifest,
+        search: state.search
     }
 }
 
@@ -19,49 +21,38 @@ const mapDispatchToProps = dispatch => {
     return {
         setFiles: (files) => dispatch(setManifest(files)),
         setPreviousKey: (key) => dispatch(setPreviousKey(key)),
-        setCurrentKey: (key) => dispatch(setCurrentKey(key))
+        setCurrentKey: (key) => dispatch(setCurrentKey(key)),
+        setAuthenticated: (status) => dispatch(setAuthenticated(status)),
+        pushKey: (key) => dispatch(pushKey(key)),
+        popKey: () => dispatch(popKey())
     }
 }
 
 function Homepage(props){
     const [showFilezone, setShowFilezone] = useState(false)
-    useEffect(() => {
-        if(!localStorage.getItem("token")) initialize()
-        else {
-            validateToken(localStorage.getItem("token"), (success) => {
-                if(success) {
-                    // good token
-                    loadInitialManifest(JSON.parse(localStorage.getItem("token")).id_token, handleManifestResponse)
-                } else initialize()
-            })
-        }
-        //eslint-disable-next-line
-    }, [props.location.search])
 
-    const initialize = () => {
+    useEffect(() => {
         let query = qs.parse(props.location.search)
 
-        if(!query.code){
-            history.push("/redirect?url=https://www.kioshq.com")
-        } else {
-            getUserToken(query.code, (token, success) => {
-                if(success) { 
-                    loadInitialManifest(token, handleManifestResponse)
-                } else history.push("/redirect?url=https://www.kioshq.com")            
-            })
-        }
-    }
-
-    const handleManifestResponse = (files, success, key) => {
-        if(success) {
-            props.setFiles(files)
-            props.setPreviousKey(key)
-        } else {
-            console.error('There was an error retrieving the data')
-        }   
-    }
-
-
+        validateToken((success) => {
+            if(success) {
+                props.setAuthenticated(true)
+            } else if(query.code) {
+                getUserToken(query.code, (success) => {
+                    if(success) { 
+                        props.setAuthenticated(true)
+                    } else {
+                        props.setAuthenticated(false)
+                        history.push("/redirect?url=https://www.kioshq.com") 
+                    }           
+                })
+            } else if(!query.code) {
+                props.setAuthenticated(false)
+                history.push("/redirect?url=https://www.kioshq.com") 
+            }
+        })
+        //eslint-disable-next-line
+    }, [])
 
     return (
         <div align="center" onDragOverCapture={() => setShowFilezone(true)} onDragExit={() => setShowFilezone(false)}>

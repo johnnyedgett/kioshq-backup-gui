@@ -1,13 +1,18 @@
 import React, { useEffect } from 'react'
-import { List, ListItem, ListItemText, ListItemSecondaryAction, IconButton, makeStyles, Button, Table, TableHead, TableRow, TableBody, TableCell } from '@material-ui/core'
-import { getS3Object, getManifest, getS3UploadURL } from '../../services/storage-service'
+import { IconButton, makeStyles, Table, TableHead, TableRow, TableBody, TableCell, Button } from '@material-ui/core'
+import { getS3Object, getManifest } from '../../services/storage-service'
 import { SaveAlt, Folder } from '@material-ui/icons'
 import { connect } from 'react-redux'
-import { setManifest, setSelectedItem, setPreviousKey, setCurrentKey } from '../../redux/actions/manifest-actions'
+import { setManifest, setSelectedItem } from '../../redux/actions/manifest-actions'
+import { pushKey, popKey } from '../../redux/actions/search-actions'
+
 const useStyles = makeStyles({
-    tableStyle: {
+    divStyle: {
         paddingLeft: '20%',
         paddingRight: '20%',
+    },
+    tableStyle: {
+        border: '1px solid grey'
     },
     rowStyle: {
         '&:hover': {
@@ -18,7 +23,9 @@ const useStyles = makeStyles({
 
 const mapStateToProps = state => {
     return {
-        manifest: state.manifest
+        manifest: state.manifest,
+        auth: state.auth,
+        search: state.search
     }
 }
 
@@ -26,21 +33,29 @@ const mapDispatchToProps = dispatch => {
     return {
         setManifest: (manifest) => dispatch(setManifest(manifest)),
         setSelectedItem: (item) => dispatch(setSelectedItem(item)),
-        setPreviousKey: (key) => dispatch(setPreviousKey(key)),
-        setCurrentKey: (key) => dispatch(setCurrentKey(key))
+        pushKey: (key) => dispatch(pushKey(key)),
+        popKey: () => dispatch(popKey())
     }
 }
 
 function FileList(props) {
     const classes = useStyles()
 
-    // useEffect(() => {
-    //     getS3UploadURL(JSON.parse(localStorage.getItem("token")).id_token, "EXAMPLE_KEY_ACCESS_DENIED", 
-    //         (data, success) => {
+    useEffect(() => {
+        // Root folder.
+        if(props.search.history.length > 0) {
+            getManifest(props.search.history[props.search.history.length-1], handleS3Response)
+        } 
+        //eslint-disable-next-line
+    }, [props.search])
 
-    //         })
-    //     console.log(props.manifest)
-    // }, [])
+    useEffect(() => {
+        if(props.auth.authenticated === true) {
+            let userKey = localStorage.getItem("aws.cognito.identity-id.us-east-1:e710452b-401f-48d9-b673-1de1146855c1")
+            props.pushKey(userKey + "/")
+        }
+        //eslint-disable-next-line
+    }, [props.auth])
 
     const handleS3Response = (data, success) => {
         if(success) {
@@ -54,35 +69,34 @@ function FileList(props) {
         }
     }
 
-    const onFolderClick = (prefix) => {
-        let token = JSON.parse(localStorage.getItem("token")).id_token
-        getManifest(prefix, token, handleS3Response)
-    }
-
     return (
         <div
-            className={classes.tableStyle}>
-            <Table>
+            className={classes.divStyle}>
+            <Table
+                className={classes.tableStyle}>
                 <TableHead>
                     <TableRow>
-                        <TableCell>Icon</TableCell>
-                        <TableCell>File</TableCell>
+                        <TableCell style={{ width: '3vw'}}>Icon</TableCell>
+                        <TableCell style={{ width: '10vw'}}>File</TableCell>
+                        <TableCell style={{ width: '3vw'}}>Size</TableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>
                     {props.manifest.files.map((item, i) => {
-                        console.log(item.Key.match(/aws.cognito.identity-id.us-east-1:e710452b-401f-48d9-b673-1de1146855c1/))
+                        let regex = /(.{1})\/(.*)/
+                        let matched = item.Key.match(regex)
                         return (
-                            <TableRow 
+                            i===0?(<TableRow key={i}/>):
+                            (<TableRow 
                                 key={i} 
                                 className={classes.rowStyle}
                                 onClick={() => { 
                                     if(item.isFolder) { 
-                                        props.setPreviousKey(props.manifest.currentKey)
-                                        props.setCurrentKey(item.Key)
-                                        onFolderClick(item.Key) 
+                                        props.pushKey(item.Key)
                                     }
-                                    else { props.setSelectedItem(item) }
+                                    else { 
+                                        props.setSelectedItem(item)
+                                    }
                                 }}
                                 >
                                 <TableCell>
@@ -95,20 +109,24 @@ function FileList(props) {
                                     </IconButton>):(
                                         <IconButton
                                             onClick={() => {
-                                                props.setPreviousKey(props.manifest.currentKey)
-                                                props.setCurrentKey(item.Key)
-                                                onFolderClick(item.Key)
+                                                // props.setPreviousKey(props.manifest.currentKey)
+                                                // props.setCurrentKey(item.Key)
+                                                props.pushKey(item.Key)
                                             }}>
                                             <Folder/>
                                         </IconButton>
                                     )}
                                 </TableCell>
-                                <TableCell>{item.Key}</TableCell>
+                                <TableCell>{matched[2]}</TableCell>
+                                <TableCell>1234 KB {item.isFolder?('(NESTED)'):('')}</TableCell>
                             </TableRow>
-                        )
+                        ))
                     })}
                 </TableBody>
             </Table>
+            <br/>
+            {props.search.history.length > 1?(<Button onClick={() => props.popKey()} variant="contained" color="primary">Up One Folder</Button>)
+                :(<Button variant="contained" disabled>Return</Button>)}
         </div>
     )
 //     return (
