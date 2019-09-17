@@ -36,20 +36,29 @@ function Homepage(props){
         let query = qs.parse(props.location.search)
 
         validateToken((success) => {
+            console.log("Validate token done.")
             if(success) {
+                console.log("Validate token done and user is logged in.")
+
                 props.setAuthenticated(true)
             } else if(query.code) {
+                console.log("Validate token done and user is NOT logged in. Checking their query code")
+
                 getUserToken(query.code, (success) => {
                     if(success) { 
+                        console.log("Good query code. User is logged in")
                         props.setAuthenticated(true)
                     } else {
+                        console.log("BAD query code. User is NOT logged in")
+
                         props.setAuthenticated(false)
-                        history.push("/redirect?url=https://www.kioshq.com") 
+                        history.push("/login")
                     }           
                 })
             } else if(!query.code) {
+                console.log("No query code. User is not logged in")
                 props.setAuthenticated(false)
-                history.push("/redirect?url=https://www.kioshq.com") 
+                history.push("/login")
             }
         })
         //eslint-disable-next-line

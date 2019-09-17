@@ -51,8 +51,16 @@ function FileList(props) {
 
     useEffect(() => {
         if(props.auth.authenticated === true) {
-            let userKey = localStorage.getItem("aws.cognito.identity-id.us-east-1:e710452b-401f-48d9-b673-1de1146855c1")
-            props.pushKey(userKey + "/")
+            if(localStorage.getItem("tokenType") == "idp" && localStorage.getItem("aws.cognito.identity-id.us-east-1:e710452b-401f-48d9-b673-1de1146855c1") != null) {
+                let userKey = localStorage.getItem("aws.cognito.identity-id.us-east-1:e710452b-401f-48d9-b673-1de1146855c1")
+                props.pushKey(userKey + "/")
+            } else {
+                setTimeout(() => {
+                    console.log("Waiting three seconds after loggins in")
+                    let userKey = localStorage.getItem("aws.cognito.identity-id.us-east-1:e710452b-401f-48d9-b673-1de1146855c1")
+                    props.pushKey(userKey + "/")
+                }, 3000)
+            }
         }
         //eslint-disable-next-line
     }, [props.auth])

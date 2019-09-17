@@ -4,6 +4,8 @@ import { Switch, Route, Link } from 'react-router-dom'
 import Navbar from '../navbar/Navbar'
 import Homepage from '../homepage/Homepage'
 import Redirect from '../redirect/Redirect'
+import Register from '../register/Register'
+import Login from '../login/Login'
 
 const theme = createMuiTheme({
     palette: {
@@ -18,9 +20,12 @@ export default function App(){
         <MuiThemeProvider theme={theme}>
             <div>
                 <Navbar/>
+                <br/>
                 <Switch>
                     <Route exact path="/" component={Homepage}/>
                     <Route exact path="/redirect" component={Redirect}/>
+                    <Route exact path="/login" component={Login}/>
+                    <Route exact path="/register" component={Register}/>
                     <Route component={() => {
                         return (
                             <div align="center">
