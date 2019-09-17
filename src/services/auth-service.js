@@ -20,20 +20,24 @@ export const getUserToken = (code, callback) => {
 }
 
 export const validateToken = (callback) => {
-    if(!localStorage.getItem("token")) callback(false)
-    let parsed = JSON.parse(localStorage.getItem("token"))
-    axios.get(`${URL}/auth/validate?code=${parsed.id_token}`, {
-            headers: { 
-                "authorizationToken": parsed.id_token
-            }
-        })
-        .then(res => {
-            console.log(res)
-            if(res.data){ 
-                callback(true)
-            } else {
-                localStorage.removeItem('token')
-                callback(false)
-            }
-        })
+    console.log(localStorage.getItem("token"))
+    if(localStorage.getItem("token") == null) { 
+        callback(false) 
+    } else {
+        let parsed = JSON.parse(localStorage.getItem("token"))
+        axios.get(`${URL}/auth/validate?code=${parsed.id_token}`, {
+                headers: { 
+                    "authorizationToken": parsed.id_token
+                }
+            })
+            .then(res => {
+                console.log(res)
+                if(res.data){ 
+                    callback(true)
+                } else {
+                    localStorage.removeItem('token')
+                    callback(false)
+                }
+            })
+    }
 }

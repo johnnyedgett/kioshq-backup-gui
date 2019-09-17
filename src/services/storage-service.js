@@ -98,7 +98,10 @@ export const getManifest = (prefix, callback) => {
     })
 }
 
-export const getS3Object = (token, key, callback) => {
+export const getS3Object = (key, callback) => {
+    let token = JSON.parse(localStorage.getItem("token")).id_token
+    if(!token) 
+        callback(null, false)
     AWS.config.region = 'us-east-1'
     AWS.config.credentials = new AWS.CognitoIdentityCredentials({
         IdentityPoolId: idp,
@@ -138,8 +141,10 @@ export const getS3Object = (token, key, callback) => {
     })
 }
 
-export const getS3UploadURL = (token, key, callback) => {
-    console.log(token)
+export const doUpload = (key, file, callback) => {
+    let token = JSON.parse(localStorage.getItem("token")).id_token
+    if(!token) 
+        callback(null, false)
     AWS.config.region = 'us-east-1'
     AWS.config.credentials = new AWS.CognitoIdentityCredentials({
         IdentityPoolId: idp,
@@ -156,11 +161,65 @@ export const getS3UploadURL = (token, key, callback) => {
             let params = {
                 Bucket: bucketName,
                 Key: key,
-                ContentType: 'image/png'
+                Body: file
             }
+            s3.upload(params, (err, data)=> {
+                if(err){ 
+                    console.error(err)
+                    callback(null, false)
+                } else {
+                    console.log(data)
+                    callback(data, true)
+                }
+            })
             console.log('Params %O', params)
-            let url = s3.getSignedUrl('putObject', params)
-            if(url) callback(url, true)
         }
     })
 }
+
+// export const getS3UploadURL = (key, fileType, file, callback) => {
+//     let token = JSON.parse(localStorage.getItem("token")).id_token
+//     if(isEmpty(token)) 
+//         callback(null, null, false)
+//     else {
+//         AWS.config.region = 'us-east-1'
+//         AWS.config.credentials = new AWS.CognitoIdentityCredentials({
+//             IdentityPoolId: idp,
+//             Logins: {
+//                 "cognito-idp.us-east-1.amazonaws.com/us-east-1_lrLPpNt41": token
+//             }
+//         })
+//         AWS.config.credentials.get((err) => {
+//             if(err) console.log('Error: %O', err)
+//             else {
+//                 let s3 = new AWS.S3({
+//                     apiVersion: '2006-03-01'
+//                 })
+//                 let params = {
+//                     Bucket: bucketName,
+//                     Key: key,
+//                     ContentType: "multipart/form-data"
+//                 }
+//                 console.log('Paams %O', params)
+//                 let url = s3.getSignedUrl('putObject', params)
+//                 if(url) callback(file, url, true)
+//             }
+//         })
+//     }
+// }
+
+// export const doUpload = (file, url, key) => {
+
+//     let data = new FormData()
+//     data.append('images[0]', file, key + file.name)
+
+//     axios.post(url, data, {
+//         headers: { 'content-type': 'multipart/form-data' }
+//     }, )
+//     .then(res => {
+//         console.log(res)
+//     })
+//     .catch(err=>{
+//         console.error("Encountered an error while uploading: %O", err)
+//     })
+// }

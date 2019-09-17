@@ -9,6 +9,7 @@ import FileList from '../filelist/FileList'
 import { connect } from 'react-redux'
 import DetailsDrawer from '../detailsdrawer/DetailsDrawer'
 import FileDropzone from '../filedropzone/FileDropzone'
+import { Button } from '@material-ui/core';
 
 const mapStateToProps = state => {
     return {
@@ -55,9 +56,11 @@ function Homepage(props){
     }, [])
 
     return (
-        <div align="center" onDragOverCapture={() => setShowFilezone(true)} onDragExit={() => setShowFilezone(false)}>
+        <div align="center" onDragOverCapture={() => setShowFilezone(true)}>
             {showFilezone?<FileDropzone/>:<span/>}
             <h1>Greetings, user. Here are your files.</h1>
+            <Button variant="outlined" color="primary" onClick={() => setShowFilezone(true)}>Upload Files</Button>
+                <br/><br/><br/>
                 <FileList/>
             <DetailsDrawer/>
         </div>
