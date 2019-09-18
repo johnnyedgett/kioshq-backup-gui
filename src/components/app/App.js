@@ -20,7 +20,6 @@ export default function App(){
         <MuiThemeProvider theme={theme}>
             <div>
                 <Navbar/>
-                <br/>
                 <Switch>
                     <Route exact path="/" component={Homepage}/>
                     <Route exact path="/redirect" component={Redirect}/>

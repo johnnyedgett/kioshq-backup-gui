@@ -23,6 +23,7 @@ export default function Login(props){
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
     const [error, setError] = useState(false)
+    const [loading, setLoading] = useState(false)
 
     const handleUserLogin = (data, success) => {
         if(success) {
@@ -31,6 +32,7 @@ export default function Login(props){
                 history.push("/")
             }, 1200)
         } else {
+            setLoading(false)
             setError(true)
         }
     }
@@ -52,6 +54,7 @@ export default function Login(props){
                         <TextField
                             label="username"
                             variant="outlined"
+                            disabled={loading}
                             placeholder="Username/Email here..."
                             value={username}
                             onChange={(event) => { setUsername(event.target.value)}}/>
@@ -59,6 +62,7 @@ export default function Login(props){
                     <Grid item>
                         <TextField
                             label="password"
+                            disabled={loading}
                             variant="outlined"
                             type="password"
                             placeholder="Password here..."
@@ -67,9 +71,11 @@ export default function Login(props){
                     </Grid>
                     <Grid item>
                         <Button
-                            disabled={(isEmpty(username) && isEmpty(password))}
+                            disabled={(isEmpty(username) && isEmpty(password)) || loading}
                             onClick={() => {
                                 console.log('I need to sign this user in')
+                                setLoading(true)
+                                setError(false)
                                 loginUser({
                                     username: username,
                                     password: password
@@ -82,8 +88,9 @@ export default function Login(props){
                     </Grid>
                 </Grid>
                 <br/>
+                {loading?<div>Trying to log you in...</div>:<br/>}
                 {error?<div><Typography variant="body2" style={{ color: 'red' }}>There was an error. Please try again.</Typography></div>:<br/>}
-                <Link to="/signup">No account? No problem. Click here.</Link>
+                <Link to="/register">No account? No problem. Click here.</Link>
                 <br/>
                 <br/>
             </Paper>

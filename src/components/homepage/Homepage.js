@@ -10,6 +10,7 @@ import { connect } from 'react-redux'
 import DetailsDrawer from '../detailsdrawer/DetailsDrawer'
 import FileDropzone from '../filedropzone/FileDropzone'
 import { Button } from '@material-ui/core';
+import Loading from '../loading/Loading.js';
 
 const mapStateToProps = state => {
     return {
@@ -30,7 +31,11 @@ const mapDispatchToProps = dispatch => {
 }
 
 function Homepage(props){
+    // const classes =
+    const [firstRun, setFirstRun] = useState(true)
     const [showFilezone, setShowFilezone] = useState(false)
+    const [reload, setReload] = useState(false)
+    const [newUser, setNewUser] = useState(false)
 
     useEffect(() => {
         let query = qs.parse(props.location.search)
@@ -64,13 +69,34 @@ function Homepage(props){
         //eslint-disable-next-line
     }, [])
 
+    const triggerReload = () => {
+        setReload(!reload)
+    }
+
+    const handleFirstRun = (status) => {
+        setFirstRun(status)
+    }
+
     return (
-        <div align="center" onDragOverCapture={() => setShowFilezone(true)}>
-            {showFilezone?<FileDropzone/>:<span/>}
+    <div align="center" onDragOverCapture={() => setShowFilezone(true)}>
+            {firstRun?<Loading/>:<span/>}
+            {showFilezone?
+            <div style={{ 
+                paddingLeft: '20vw', 
+                paddingRight: '20vw'
+                }}>
+                    <FileDropzone 
+                        triggerReload={triggerReload}/>
+            </div>:<span/>}
             <h1>Greetings, user. Here are your files.</h1>
-            <Button variant="outlined" color="primary" onClick={() => setShowFilezone(true)}>Upload Files</Button>
+            <Button variant="outlined" color="primary" onClick={() => setShowFilezone(true)} disabled={() => { return firstRun || newUser }}>Upload Files</Button>
                 <br/><br/><br/>
-                <FileList/>
+                <FileList
+                    reload={reload}
+                    firstRun={firstRun}
+                    setFirstRun={handleFirstRun}
+                    newUser={newUser}
+                    setNewUser={setNewUser}/>
             <DetailsDrawer/>
         </div>
     )

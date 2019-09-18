@@ -72,7 +72,7 @@ export default function Register(props){
                 </Grid>
                 <br/>
                 <br/>
-                <Link to="/signin">Already have an account? No problem. Click here.</Link>
+                <Link to="/login">Already have an account? No problem. Click here.</Link>
                 <br/>
                 <br/>
             </Paper>

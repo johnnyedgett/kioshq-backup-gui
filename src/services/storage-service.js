@@ -57,7 +57,12 @@ export const getManifest = (prefix, callback) => {
                         tmp.push(e)
                     })
 
-                    callback(tmp, true)
+                    if(isEmpty(tmp)) {
+                        console.log('Call the create user method, and indicate that some way.')
+                        callback(tmp, true, true)
+                    }
+
+                    callback(tmp, true, false)
                 }
             })
         }
@@ -75,12 +80,16 @@ export const getS3Object = (key, callback) => {
     }
     if(!token) 
         callback(null, false)
+
+    let loginObject = localStorage.getItem("tokenType")==="idp"?{
+        "cognito-idp.us-east-1.amazonaws.com/us-east-1_lrLPpNt41": token
+    }:{
+        "cognito-idp.us-east-1.amazonaws.com/us-east-1_7fYzC9gB5": token
+    }
     AWS.config.region = 'us-east-1'
     AWS.config.credentials = new AWS.CognitoIdentityCredentials({
         IdentityPoolId: idp,
-        Logins: {
-            "cognito-idp.us-east-1.amazonaws.com/us-east-1_lrLPpNt41": token
-        }
+        Logins: loginObject
     })
     AWS.config.credentials.get((err) => {
         if(err) console.log('Error: %O', err)
@@ -118,20 +127,24 @@ export const doUpload = (key, file, callback) => {
     let token = localStorage.getItem("token")
     if(!isEmpty(token)) {
         if(localStorage.getItem("tokenType") == "custom"){
-
+            
         } else if (localStorage.getItem("tokenType") == "idp") {
             token = JSON.parse(localStorage.getItem("token")).id_token
         }
     }
     if(!token) 
         callback(null, false)
-        
+
+    let loginObject = localStorage.getItem("tokenType")==="idp"?{
+        "cognito-idp.us-east-1.amazonaws.com/us-east-1_lrLPpNt41": token
+    }:{
+        "cognito-idp.us-east-1.amazonaws.com/us-east-1_7fYzC9gB5": token
+    }
+
     AWS.config.region = 'us-east-1'
     AWS.config.credentials = new AWS.CognitoIdentityCredentials({
         IdentityPoolId: idp,
-        Logins: {
-            "cognito-idp.us-east-1.amazonaws.com/us-east-1_lrLPpNt41": token
-        }
+        Logins: loginObject
     })
     AWS.config.credentials.get((err) => {
         if(err) console.log('Error: %O', err)
@@ -150,6 +163,7 @@ export const doUpload = (key, file, callback) => {
                     callback(null, false)
                 } else {
                     console.log(data)
+                    console.log('hotdog')
                     callback(data, true)
                 }
             })
@@ -157,50 +171,3 @@ export const doUpload = (key, file, callback) => {
         }
     })
 }
-
-// export const getS3UploadURL = (key, fileType, file, callback) => {
-//     let token = JSON.parse(localStorage.getItem("token")).id_token
-//     if(isEmpty(token)) 
-//         callback(null, null, false)
-//     else {
-//         AWS.config.region = 'us-east-1'
-//         AWS.config.credentials = new AWS.CognitoIdentityCredentials({
-//             IdentityPoolId: idp,
-//             Logins: {
-//                 "cognito-idp.us-east-1.amazonaws.com/us-east-1_lrLPpNt41": token
-//             }
-//         })
-//         AWS.config.credentials.get((err) => {
-//             if(err) console.log('Error: %O', err)
-//             else {
-//                 let s3 = new AWS.S3({
-//                     apiVersion: '2006-03-01'
-//                 })
-//                 let params = {
-//                     Bucket: bucketName,
-//                     Key: key,
-//                     ContentType: "multipart/form-data"
-//                 }
-//                 console.log('Paams %O', params)
-//                 let url = s3.getSignedUrl('putObject', params)
-//                 if(url) callback(file, url, true)
-//             }
-//         })
-//     }
-// }
-
-// export const doUpload = (file, url, key) => {
-
-//     let data = new FormData()
-//     data.append('images[0]', file, key + file.name)
-
-//     axios.post(url, data, {
-//         headers: { 'content-type': 'multipart/form-data' }
-//     }, )
-//     .then(res => {
-//         console.log(res)
-//     })
-//     .catch(err=>{
-//         console.error("Encountered an error while uploading: %O", err)
-//     })
-// }

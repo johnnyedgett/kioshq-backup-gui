@@ -3,6 +3,19 @@ import { useDropzone } from 'react-dropzone'
 import isEmpty from 'lodash.isempty'
 import { connect } from 'react-redux'
 import { doUpload } from '../../services/storage-service'
+import { makeStyles } from '@material-ui/core';
+
+const useStyles = makeStyles({
+    root: {
+        paddingLeft: '20vw',
+        paddingRight: '20vw',
+        border: '1px solid black',
+        backgroundColor: '',
+        zIndex: 1,
+        display: 'block',
+        margin: '0 auto'
+    }
+})
 
 const mapStateToProps = state => {
     return {
@@ -16,12 +29,12 @@ const mapDispatchToProps = dispatch => {
     }
 }
 function FileDropzone(props) {
+    const classes = useStyles()
     const [files, setFiles] = useState([])
 
     useEffect(() => {
         console.log(files)
         if(!isEmpty(files)) {
-            // get the s3 upload urls for all of them
             files.forEach(f => {
                 doUpload(`${props.search.history[props.search.history.length-1]}${f.name}`, f, uploadResponse)
             })
@@ -30,7 +43,7 @@ function FileDropzone(props) {
 
     const uploadResponse = (details, success) => {
         if(success){
-
+            props.triggerReload()
         }
         else{
             console.log('There was an error with hte upload')
@@ -47,12 +60,7 @@ function FileDropzone(props) {
     const { getRootProps, getInputProps, isDragActive } = useDropzone({onDrop})
 
     return (
-        <div { ...getRootProps()} align="center"
-            style={{ 
-                border: '1px solid #f8f8f8',
-                backgroundColor: '',
-                zIndex: 1,
-            }}>
+        <div { ...getRootProps()} align="center" className={classes.root}>
             <input {...getInputProps()} />
             {
                 isDragActive?
@@ -60,12 +68,9 @@ function FileDropzone(props) {
                     !isEmpty(files)?(
                     <div>
                         {files.map((f, i) => { 
-                            console.log(f)
-                            return (
-                                <p key={i}>{f.name}</p>)})}
+                            return (<p key={i}>{f.name}</p>)})}
                     </div>
-                    ):
-                        (<p>Drag 'n' drop some files here, or click to select files</p>)
+                    ):(<p>Drag 'n' drop some files here, or click to select files</p>)
             }
         </div>
     )
