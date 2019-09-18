@@ -24,11 +24,13 @@ export const getUserToken = (code, callback) => {
 }
 
 export const validateToken = (callback) => {
+
     let token = localStorage.getItem("token")
     if(!isEmpty(token)) {
         console.log(token)
         if(localStorage.getItem("tokenType") == "custom"){
-
+            callback(true) // 
+            return
         } else if (localStorage.getItem("tokenType") == "idp") {
             token = JSON.parse(localStorage.getItem("token")).id_token
         }
@@ -51,6 +53,7 @@ export const validateToken = (callback) => {
             }
         })
         .catch(err => {
+            console.error("I got an error.,")
             callback(false)
         })
     }

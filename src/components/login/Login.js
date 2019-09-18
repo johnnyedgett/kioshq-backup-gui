@@ -1,9 +1,11 @@
 import React, { useState } from 'react'
-import { Button, Grid, TextField, Paper } from '@material-ui/core'
+import { Button, Grid, TextField, Paper, Typography } from '@material-ui/core'
 import { makeStyles } from '@material-ui/styles';
 import isEmpty from 'lodash.isempty'
 import { Link } from 'react-router-dom'
 import { loginUser } from '../../services/auth-service';
+import history from '../../util/history'
+
 let url = "https://kios-gidp.auth.us-east-1.amazoncognito.com/login?response_type=code&client_id=2lhs1j0ndljittj7294mvd5dnp&redirect_uri=https://www.kioshq.com"
 
 const useStyles = makeStyles({ 
@@ -20,12 +22,16 @@ export default function Login(props){
     const classes = useStyles()
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
+    const [error, setError] = useState(false)
 
     const handleUserLogin = (data, success) => {
         if(success) {
             console.log('I have successfully authenticated the user. %O', data)
+            setTimeout(() => {
+                history.push("/")
+            }, 1200)
         } else {
-            console.log('There was an error authenticating the user.')
+            setError(true)
         }
     }
 
@@ -76,7 +82,7 @@ export default function Login(props){
                     </Grid>
                 </Grid>
                 <br/>
-                <br/>
+                {error?<div><Typography variant="body2" style={{ color: 'red' }}>There was an error. Please try again.</Typography></div>:<br/>}
                 <Link to="/signup">No account? No problem. Click here.</Link>
                 <br/>
                 <br/>

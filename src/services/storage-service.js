@@ -17,12 +17,16 @@ export const getManifest = (prefix, callback) => {
     if(!token) 
         callback(null, false)
 
+    let loginObject = localStorage.getItem("tokenType")==="idp"?{
+        "cognito-idp.us-east-1.amazonaws.com/us-east-1_lrLPpNt41": token
+    }:{
+        "cognito-idp.us-east-1.amazonaws.com/us-east-1_7fYzC9gB5": token
+    }
+
     AWS.config.region = 'us-east-1'
     AWS.config.credentials = new AWS.CognitoIdentityCredentials({
         IdentityPoolId: idp,
-        Logins: {
-            "cognito-idp.us-east-1.amazonaws.com/us-east-1_lrLPpNt41": token
-        }
+        Logins: loginObject
     })
     AWS.config.credentials.get((err) => {
         if(err) console.log('Error: %O', err)
