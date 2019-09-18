@@ -11,6 +11,7 @@ import DetailsDrawer from '../detailsdrawer/DetailsDrawer'
 import FileDropzone from '../filedropzone/FileDropzone'
 import { Button } from '@material-ui/core';
 import Loading from '../loading/Loading.js';
+import { createUserFolder } from '../../services/storage-service.js';
 
 const mapStateToProps = state => {
     return {
@@ -69,12 +70,26 @@ function Homepage(props){
         //eslint-disable-next-line
     }, [])
 
+    useEffect(()=> {
+        if(newUser)
+        createUserFolder(handleUserFolderResponse)
+    }, [newUser])
+
     const triggerReload = () => {
         setReload(!reload)
     }
 
     const handleFirstRun = (status) => {
         setFirstRun(status)
+    }
+
+    const handleUserFolderResponse = (data, success) => {
+        if(success)
+        {
+            setNewUser(false)
+            setReload(!reload)
+        }
+                  
     }
 
     return (

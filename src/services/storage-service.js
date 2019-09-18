@@ -2,15 +2,16 @@ import AWS from 'aws-sdk'
 import axios from 'axios'
 import isEmpty from 'lodash.isempty'
 
+const API_GATEWAY_URL = "https://3k2usm3hi3.execute-api.us-east-1.amazonaws.com/development"
 const idp = "us-east-1:e710452b-401f-48d9-b673-1de1146855c1"
 const bucketName = "kiosbackup-standard"
 
 export const getManifest = (prefix, callback) => {
     let token = localStorage.getItem("token")
     if(!isEmpty(token)) {
-        if(localStorage.getItem("tokenType") == "custom"){
+        if(localStorage.getItem("tokenType") === "custom"){
 
-        } else if (localStorage.getItem("tokenType") == "idp") {
+        } else if (localStorage.getItem("tokenType") === "idp") {
             token = JSON.parse(localStorage.getItem("token")).id_token
         }
     }
@@ -72,16 +73,16 @@ export const getManifest = (prefix, callback) => {
 export const getS3Object = (key, callback) => {
     let token = localStorage.getItem("token")
     if(!isEmpty(token)) {
-        if(localStorage.getItem("tokenType") == "custom"){
+        if(localStorage.getItem("tokenType") === "custom"){
 
-        } else if (localStorage.getItem("tokenType") == "idp") {
+        } else if (localStorage.getItem("tokenType") === "idp") {
             token = JSON.parse(localStorage.getItem("token")).id_token
         }
     }
     if(!token) 
         callback(null, false)
 
-    let loginObject = localStorage.getItem("tokenType")==="idp"?{
+    let loginObject = localStorage.getItem("tokenType") === "idp"?{
         "cognito-idp.us-east-1.amazonaws.com/us-east-1_lrLPpNt41": token
     }:{
         "cognito-idp.us-east-1.amazonaws.com/us-east-1_7fYzC9gB5": token
@@ -126,16 +127,16 @@ export const getS3Object = (key, callback) => {
 export const doUpload = (key, file, callback) => {
     let token = localStorage.getItem("token")
     if(!isEmpty(token)) {
-        if(localStorage.getItem("tokenType") == "custom"){
+        if(localStorage.getItem("tokenType") === "custom"){
             
-        } else if (localStorage.getItem("tokenType") == "idp") {
+        } else if (localStorage.getItem("tokenType") === "idp") {
             token = JSON.parse(localStorage.getItem("token")).id_token
         }
     }
     if(!token) 
         callback(null, false)
 
-    let loginObject = localStorage.getItem("tokenType")==="idp"?{
+    let loginObject = localStorage.getItem("tokenType") === "idp"?{
         "cognito-idp.us-east-1.amazonaws.com/us-east-1_lrLPpNt41": token
     }:{
         "cognito-idp.us-east-1.amazonaws.com/us-east-1_7fYzC9gB5": token
@@ -170,4 +171,34 @@ export const doUpload = (key, file, callback) => {
             console.log('Params %O', params)
         }
     })
+}
+
+
+// https://3k2usm3hi3.execute-api.us-east-1.amazonaws.com/development/auth/create?userId=us-east-1:3d4cc673-83df-4d33-9515-6138a099ac89
+export const createUserFolder = (callback) => {
+    // FLOW 1 - tokenType = "custom"
+    let token = localStorage.getItem("token")
+    if(!isEmpty(token)) {
+        if(localStorage.getItem("tokenType") === "custom"){
+            
+        } else if (localStorage.getItem("tokenType") === "idp") {
+            token = JSON.parse(localStorage.getItem("token")).id_token
+        }
+    }
+    if(!token) 
+        callback(null, false)
+
+    let userId = localStorage.getItem("aws.cognito.identity-id.us-east-1:e710452b-401f-48d9-b673-1de1146855c1")
+    console.log(`I am going to call ${API_GATEWAY_URL}/auth/create?userId=${userId}`)
+    axios.get(`${API_GATEWAY_URL}/auth/create?userId=${userId}`, { headers: { "authorizationToken": token}})
+        .then(res => {
+            console.log(res)
+            if(res.status === 204)
+                callback(res, true)
+            else callback(res, false)
+        })
+        .catch(err => {
+            console.error(err)
+            callback(err, false)
+        })
 }
