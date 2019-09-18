@@ -37,13 +37,18 @@ function Navbar(props) {
                 </IconButton>
                 Kios Software Backup
                 <div style={{ flexGrow: 1}}/>
-                <Button variant="text" onClick={() => { 
-                    localStorage.clear();
-                    history.push("/login")
-                    props.setAuthenticated(false)
+                {props.auth.authenticated?(
+                    <Button variant="text" onClick={() => { 
+                        localStorage.clear();
+                        props.setSnackbarMessage('Successfully signed out!')
+                        props.setSnackbarOpen(true)
+                        history.push("/login")
+                        props.setAuthenticated(false)
                     }}>
                         <div style={{ color: 'white' }}>Sign out</div>
                     </Button>
+                ):<span/>}
+
             </Toolbar>
         </AppBar>
     )

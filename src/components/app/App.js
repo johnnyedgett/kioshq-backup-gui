@@ -1,5 +1,6 @@
-import React from 'react'
-import { createMuiTheme, MuiThemeProvider } from '@material-ui/core'
+import React, { useState } from 'react'
+import { createMuiTheme, MuiThemeProvider, Snackbar, IconButton } from '@material-ui/core'
+import CloseIcon from '@material-ui/icons/Close';
 import { Switch, Route, Link } from 'react-router-dom'
 import Navbar from '../navbar/Navbar'
 import Homepage from '../homepage/Homepage'
@@ -16,15 +17,46 @@ const theme = createMuiTheme({
 })
 
 export default function App(){
+    const [snackbarOpen, setSnackbarOpen] = useState(false)
+    const [snackbarMessage, setSnackbarMessage] = useState('')
+
+    const handleClose = () => {
+        setSnackbarOpen(false)
+        setSnackbarMessage('')
+    }
+    
     return (
         <MuiThemeProvider theme={theme}>
             <div>
-                <Navbar/>
+                <Navbar
+                    setSnackbarMessage={setSnackbarMessage}
+                    setSnackbarOpen={setSnackbarOpen}/>
                 <Switch>
-                    <Route exact path="/" component={Homepage}/>
+                    <Route exact path="/" component={(props) => {
+                        return (
+                            <Homepage
+                                location={props.location}
+                                setSnackbarMessage={setSnackbarMessage}
+                                setSnackbarOpen={setSnackbarOpen}/>
+                        )
+                    }}/>
                     <Route exact path="/redirect" component={Redirect}/>
-                    <Route exact path="/login" component={Login}/>
-                    <Route exact path="/register" component={Register}/>
+                    <Route exact path="/login" component={(props) => {
+                        return (
+                            <Login
+                                location={props.location}
+                                setSnackbarMessage={setSnackbarMessage}
+                                setSnackbarOpen={setSnackbarOpen}/>
+                        )
+                    }}/>
+                    <Route exact path="/register" component={(props) => { 
+                        return (
+                            <Register
+                                location={props.location}
+                                setSnackbarMessage={setSnackbarMessage}
+                                setSnackbarOpen={setSnackbarOpen}/>
+                        )
+                    }}/>
                     <Route component={() => {
                         return (
                             <div align="center">
@@ -35,6 +67,28 @@ export default function App(){
                     }}/>
                 </Switch>
             </div>
+            <Snackbar
+                anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'left',
+                }}
+                open={snackbarOpen}
+                autoHideDuration={3000}
+                onClose={handleClose}
+                ContentProps={{
+                    'aria-describedby': 'message-id',
+                }}
+                message={<span id="message-id">{snackbarMessage}</span>}
+                action={[
+                    <IconButton
+                      key="close"
+                      aria-label="close"
+                      color="inherit"
+                      onClick={handleClose}
+                    >
+                      <CloseIcon />
+                    </IconButton>,
+                  ]}/>
         </MuiThemeProvider>
     )
 }

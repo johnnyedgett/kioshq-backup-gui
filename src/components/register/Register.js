@@ -3,6 +3,7 @@ import { Typography, Button, Grid, Paper, TextField, makeStyles } from '@materia
 import isEmpty from 'lodash.isempty'
 import { Link } from 'react-router-dom'
 import { registerUser } from '../../services/auth-service';
+import history from '../../util/history'
 
 const useStyles = makeStyles({ 
     root: {
@@ -21,7 +22,12 @@ export default function Register(props){
     const [password, setPassword] = useState('')
 
     const handleUserRegistered = (data, success) => {
-        console.log("Successful: %O, Response: %O", success, data)
+        if(success) {
+            console.log("Successful: %O, Response: %O", success, data)
+            props.setSnackbarMessage('Registered successfully! Please login again.')
+            props.setSnackbarOpen(true)
+            history.push("/login")
+        }
     }
 
     return (

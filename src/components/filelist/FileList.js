@@ -103,7 +103,7 @@ function FileList(props) {
                     Welcome to Kios! Please wait while we finish setting up your account. No need to go anywhere - this will update automagically!
                     <br/>
                     <br/>
-                    <CircularProgress/>
+                    <CircularProgress variant="indeterminate"/>
                 </div>:
                 <Table
                     className={classes.tableStyle}>

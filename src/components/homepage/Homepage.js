@@ -38,6 +38,7 @@ function Homepage(props){
     const [reload, setReload] = useState(false)
     const [newUser, setNewUser] = useState(false)
     const [buttonDisabled, setButtonDisabled] = useState(true)
+
     useEffect(() => {
         let query = qs.parse(props.location.search)
 

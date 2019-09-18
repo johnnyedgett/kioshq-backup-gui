@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Button, Grid, TextField, Paper, Typography } from '@material-ui/core'
+import { Button, Grid, TextField, Paper, Typography, CircularProgress } from '@material-ui/core'
 import { makeStyles } from '@material-ui/styles';
 import isEmpty from 'lodash.isempty'
 import { Link } from 'react-router-dom'
@@ -29,6 +29,8 @@ export default function Login(props){
         if(success) {
             console.log('I have successfully authenticated the user. %O', data)
             setTimeout(() => {
+                props.setSnackbarMessage('Logged in! Sweet! 🎉')
+                props.setSnackbarOpen(true)
                 history.push("/")
             }, 1200)
         } else {
@@ -88,7 +90,7 @@ export default function Login(props){
                     </Grid>
                 </Grid>
                 <br/>
-                {loading?<div>Trying to log you in...</div>:<br/>}
+                {loading?<div>Logging you in... <br/><br/> <CircularProgress variant="indeterminate"/></div>:<br/>}
                 {error?<div><Typography variant="body2" style={{ color: 'red' }}>There was an error. Please try again.</Typography></div>:<br/>}
                 <Link to="/register">No account? No problem. Click here.</Link>
                 <br/>
