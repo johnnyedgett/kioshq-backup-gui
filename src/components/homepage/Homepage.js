@@ -37,7 +37,7 @@ function Homepage(props){
     const [showFilezone, setShowFilezone] = useState(false)
     const [reload, setReload] = useState(false)
     const [newUser, setNewUser] = useState(false)
-
+    const [buttonDisabled, setButtonDisabled] = useState(true)
     useEffect(() => {
         let query = qs.parse(props.location.search)
 
@@ -72,8 +72,15 @@ function Homepage(props){
 
     useEffect(()=> {
         if(newUser)
-        createUserFolder(handleUserFolderResponse)
+            createUserFolder(handleUserFolderResponse)
     }, [newUser])
+
+    useEffect(() => {
+        console.log("First Run: %O, New User: %O", firstRun, newUser)
+        if(firstRun === false && newUser === false){
+            setButtonDisabled(false)
+        }
+    }, [newUser, firstRun])
 
     const triggerReload = () => {
         setReload(!reload)
@@ -104,7 +111,7 @@ function Homepage(props){
                         triggerReload={triggerReload}/>
             </div>:<span/>}
             <h1>Greetings, user. Here are your files.</h1>
-            <Button variant="outlined" color="primary" onClick={() => setShowFilezone(true)} disabled={() => { return firstRun || newUser }}>Upload Files</Button>
+            <Button variant="contained" color="primary" onClick={() => setShowFilezone(true)} disabled={buttonDisabled}>Upload Files</Button>
                 <br/><br/><br/>
                 <FileList
                     reload={reload}

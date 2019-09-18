@@ -106,7 +106,7 @@ function FileList(props) {
                     <CircularProgress/>
                 </div>:
                 <Table
-                className={classes.tableStyle}>
+                    className={classes.tableStyle}>
                 <TableHead>
                     <TableRow>
                         <TableCell style={{ width: '3vw'}}>Icon</TableCell>
@@ -136,7 +136,11 @@ function FileList(props) {
                                     {!item.isFolder?(<IconButton 
                                         edge="end"
                                         onClick={() => {
-                                            getS3Object(JSON.parse(localStorage.getItem("token")).id_token, item.Key, handleS3DownloadResponse)
+                                            console.log("You clicked the ICON button: LETS GET THAT OBJECT!")
+                                            if(localStorage.getItem("tokenType") === "custom")
+                                                getS3Object(item.Key, handleS3DownloadResponse)
+                                            else 
+                                                getS3Object(item.Key, handleS3DownloadResponse)
                                         }}>
                                         <SaveAlt/>
                                     </IconButton>):(

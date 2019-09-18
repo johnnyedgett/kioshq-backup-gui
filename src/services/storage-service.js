@@ -71,6 +71,8 @@ export const getManifest = (prefix, callback) => {
 }
 
 export const getS3Object = (key, callback) => {
+    console.log("Im trying to download %O", key)
+    
     let token = localStorage.getItem("token")
     if(!isEmpty(token)) {
         if(localStorage.getItem("tokenType") === "custom"){
@@ -106,6 +108,8 @@ export const getS3Object = (key, callback) => {
             let url = s3.getSignedUrl('getObject', params)
 
             const regex = /.+?(?=\/)\/(.*)/
+            console.log(key)
+            console.log(key.match(regex))
             let fName = key.match(regex)[1]
 
             axios({
@@ -190,7 +194,7 @@ export const createUserFolder = (callback) => {
 
     let userId = localStorage.getItem("aws.cognito.identity-id.us-east-1:e710452b-401f-48d9-b673-1de1146855c1")
     console.log(`I am going to call ${API_GATEWAY_URL}/auth/create?userId=${userId}`)
-    axios.get(`${API_GATEWAY_URL}/auth/create?userId=${userId}`, { headers: { "authorizationToken": token}})
+    axios.get(`${API_GATEWAY_URL}/auth/create?userId=${userId}`, { headers: { "Authorization": token}})
         .then(res => {
             console.log(res)
             if(res.status === 204)
