@@ -5,6 +5,7 @@ import { Switch, Route, Link, Redirect } from 'react-router-dom'
 import Navbar from '../navbar/Navbar'
 import Homepage from '../homepage/Homepage'
 import Register from '../register/Register'
+import RegisterConfirm from '../register/RegisterConfirm'
 import Login from '../login/Login'
 import Loading from '../loading/Loading'
 import { setAuthenticated } from '../../redux/actions/auth-actions';
@@ -57,6 +58,13 @@ function App(props){
         </div>
     )
 
+    const RegisterConfirmContainer = () => (
+        <div className="registerConfirmContainer">
+            <Route exact path="/" render={() => <Redirect to="/confirm"/>}/>
+            <Route path="/confirm" component={RegisterConfirm}/>
+        </div>
+    )
+
     const DefaultContainer = () => (
         <div>
             <Navbar/>
@@ -74,6 +82,7 @@ function App(props){
                 <Switch>
                     <Route exact path="/(login)" component={LoginContainer}/>
                     <Route exact path="/(register)" component={RegisterContainer}/>
+                    <Route exact path="/(confirm)" component={RegisterConfirmContainer}/>
                     <Route exact path="/" component={DefaultContainer}/>
                     <Route component={() => {
                         return (

@@ -52,11 +52,9 @@ function FileDropzone(props) {
 
     const onDrop = useCallback(acceptedFiles => {
         console.log('going to set the files')
-        acceptedFiles.forEach(f => {
-            
-        })
         setFiles(acceptedFiles) // then do something for each of them
     }, [])
+    
     const { getRootProps, getInputProps, isDragActive } = useDropzone({onDrop})
 
     return (

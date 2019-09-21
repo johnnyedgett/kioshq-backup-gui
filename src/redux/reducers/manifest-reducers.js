@@ -20,6 +20,7 @@ export default function manifest(state = initialState, action) {
                 item.isFolder = matched[matched.length-1] === ''?true:false
                 return item
             })
+            console.log(tmp)
             return Object.assign({}, state, {
                 files: tmp
             })

@@ -7,12 +7,13 @@ import FileList from '../filelist/FileList'
 import { connect } from 'react-redux'
 import DetailsDrawer from '../detailsdrawer/DetailsDrawer'
 import FileDropzone from '../filedropzone/FileDropzone'
-import { IconButton, Button, Snackbar } from '@material-ui/core';
+import { IconButton, Button, Snackbar, Dialog, DialogTitle } from '@material-ui/core';
 import { CloseIcon } from '@material-ui/icons/Close'
-import { createUserFolder } from '../../services/storage-service.js';
+import { createFolder, createUserFolder } from '../../services/storage-service.js';
 import { getManifest } from '../../services/storage-service'
 import { setSnackbarMessage, setSnackbarVisible } from '../../redux/actions/snackbar-actions'
 import isEmpty from 'lodash.isempty'
+import PromptBox from '../promptbox/PromptBox';
 
 const prefixSource = "aws.cognito.identity-id.us-east-1:e710452b-401f-48d9-b673-1de1146855c1"
 
@@ -46,6 +47,7 @@ function Homepage(props){
     const [reload, setReload] = useState(false)
     const [newUser, setNewUser] = useState(false)
     const [buttonDisabled, setButtonDisabled] = useState(true)
+    const [createFolderOpen, setCreateFolderOpen] = useState(false)
 
     useEffect(()=> {
         if(newUser)
@@ -60,27 +62,22 @@ function Homepage(props){
 
     }, [newUser, firstRun])
 
-    const triggerReload = () => {
-        setReload(!reload)
-    }
-
-    const handleUserFolderResponse = (data, success) => {
-        if(success) {
-            setNewUser(false)
-            setReload(!reload)
-        }
-    }
-
     useEffect(() => {
+        console.log("Ran the initial mounting method")
+
         let prefix = localStorage.getItem(prefixSource)
         prefix = prefix+"/"
         getManifest(prefix, (files, success, isNewUser) => {
             if(success) { 
                 if(isNewUser) {
+                    setFirstRun(false)
                     setNewUser(true)
-                } else {
+                } 
+                else {
+                    console.log('files for the new user: %O', files)
                     props.setFiles(files)
-                    props.pushKey(files[0].Key)
+                    if(files.length > 0)
+                        props.pushKey(files[0].Key)
                     setFirstRun(false)
                 }
             } else {
@@ -96,8 +93,36 @@ function Homepage(props){
                     props.setFiles(files)
                 }
             })
+        } else if (isEmpty(props.search.activeKey) && !firstRun && newUser) { // this is a new user
+            console.log("NICE ")
+            let prefix = localStorage.getItem(prefixSource)
+            prefix = prefix+"/"
+            getManifest(prefix, (files, success, isNewUser) => {
+                if(success) {
+                    props.setFiles(files)
+                    props.pushKey(files[0].Key)
+                    setNewUser(false)
+                }
+            })
         }
     }, [props.search, reload])
+
+    const triggerReload = () => {
+        setReload(!reload)
+    }
+
+    const handleUserFolderResponse = (data, success) => {
+        if(success) {
+            setReload(!reload)
+        }
+    }
+
+    const handleCreateFolder = (data, success) => {
+        if(success) {
+            console.log(data)
+            setReload(!reload)
+        }
+    }
 
     return (
         <div align="center" onDragOverCapture={() => setShowFilezone(true)}>
@@ -110,12 +135,20 @@ function Homepage(props){
                         triggerReload={triggerReload}/>
             </div>:<span/>}
             <h1>Greetings, user. Here are your files.</h1>
-            <Button variant="contained" color="primary" onClick={() => setShowFilezone(true)} disabled={buttonDisabled}>Upload Files</Button>
-                <br/><br/><br/>
-                <FileList
-                    reload={reload}
-                    firstRun={firstRun}
-                    newUser={newUser}/>
+            <Button variant="contained" color="primary" onClick={() => setShowFilezone(true)} disabled={buttonDisabled}>Upload Files</Button> &nbsp;
+            <Button 
+                variant="contained"
+                color="primary"
+                onClick={() => setCreateFolderOpen(true)}
+                // onClick={() => createFolder(props.search.activeKey + "test/", handleCreateFolder)}
+                disabled={buttonDisabled}>
+                    Create Folder
+            </Button>
+            <br/><br/><br/>
+            <FileList
+                reload={reload}
+                firstRun={firstRun}
+                newUser={newUser}/>
             <DetailsDrawer/>
             <Snackbar
                 anchorOrigin={{
@@ -146,6 +179,14 @@ function Homepage(props){
                       {/* <CloseIcon /> */}
                     </IconButton>
                   ]}/>
+                <PromptBox
+                    open={createFolderOpen}
+                    onClose={() => setCreateFolderOpen(false)}
+                    submitValue={(input) => createFolder(props.search.activeKey + input + "/", handleCreateFolder)}
+                    prompt={{
+                        "title": "Input folder name"
+                    }}
+                    />
         </div>
     )
 }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Button, Grid, TextField, Paper, Typography, CircularProgress } from '@material-ui/core'
 import { makeStyles } from '@material-ui/styles';
 import isEmpty from 'lodash.isempty'
@@ -42,6 +42,10 @@ function Login(props){
     const [error, setError] = useState(false)
     const [loading, setLoading] = useState(false)
 
+    useEffect(() => {
+        console.log("Login props")
+        console.log(props)
+    }, [])
     const handleUserLogin = (data, success) => {
         if(success) {
             setTimeout(() => {

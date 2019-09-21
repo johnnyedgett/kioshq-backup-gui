@@ -8,25 +8,37 @@ import history from '../../util/history'
 const useStyles = makeStyles({ 
     root: {
         paddingLeft: '30vw',
-        paddingRight: '30vw'
+        paddingRight: '30vw',
+        paddingTop: '20vh'
     },
     paper: {
         border: '1px solid #e7e7e7',
         boxShadow: '0 0 0 0'
+    },
+    textField: {
+        width: '100%'
     }
 })
 
 export default function Register(props){
     const classes = useStyles()
+    const [email, setEmail] = useState('')
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
+    const [error, setError] = useState(false)
+    const [errorMessage, setErrorMessage] = useState('')
 
     const handleUserRegistered = (data, success) => {
         if(success) {
             console.log("Successful: %O, Response: %O", success, data)
-            props.setSnackbarMessage('Registered successfully! Please login again.')
-            props.setSnackbarOpen(true)
-            history.push("/login")
+            localStorage.setItem("cu", JSON.stringify(data));
+            history.push({
+                pathname: '/confirm',
+                state: { cameFromRegister: true }
+            })
+        } else {
+            setError(true)
+            setErrorMessage(data.message)
         }
     }
 
@@ -46,14 +58,27 @@ export default function Register(props){
                     </Grid>
                     <Grid item>
                         <TextField
+                            className={classes.textField}
+                            label="email"
+                            variant="outlined"
+                            required
+                            placeholder="Email here..."
+                            value={email}
+                            onChange={(event) => { setEmail(event.target.value)}}
+                            type="email"
+                            required/>
+                    </Grid>
+                    <Grid item>
+                        <TextField
                             label="username"
                             variant="outlined"
-                            placeholder="Username/Email here..."
+                            placeholder="(Optional) Username here..."
                             value={username}
                             onChange={(event) => { setUsername(event.target.value)}}/>
                     </Grid>
                     <Grid item>
                         <TextField
+                            required
                             label="password"
                             variant="outlined"
                             type="password"
@@ -67,7 +92,7 @@ export default function Register(props){
                             onClick={() => {
                                 console.log('I need to sign this user in')
                                 registerUser({
-                                    username: username, password: password
+                                    email: email, username: username, password: password
                                 }, handleUserRegistered)
                             }}
                             variant="contained"
@@ -76,6 +101,7 @@ export default function Register(props){
                             </Button>
                     </Grid>
                 </Grid>
+                {error?<div style={{ color: 'red' }}><br/>There was an error: {errorMessage}<br/></div>:<span/>}
                 <br/>
                 <br/>
                 <Link to="/login">Already have an account? No problem. Click here.</Link>

@@ -67,17 +67,21 @@ export const registerUser = (user, callback) => {
     let cognitoUser
     let dataEmail = {
         Name: 'email',
-        Value: 'cocakumar94@hotmail.com'
+        Value: user.email
     }
+
     var attributeEmail = 
         new AmazonCognitoIdentity.CognitoUserAttribute(dataEmail);
+
     let attributeList = []
     attributeList.push(attributeEmail)
 
 
     userPool.signUp(user.username, user.password, attributeList, null, (err, res) => {
-        if(err)
+        if(err) {
+            console.error(err)
             callback(err, false)
+        }
         else {
             cognitoUser = res.user    
             callback(cognitoUser, true)
@@ -148,5 +152,28 @@ export const loginUser = (user, callback) => {
             var verificationCode = prompt('Please input verification code' ,'');
             cognitoUser.sendMFACode(verificationCode, this);
         }
+    });
+}
+
+export const confirmUser = (code, user, callback) => {
+    let poolData = {
+        UserPoolId: "us-east-1_7fYzC9gB5",
+        ClientId: "5j94132ns34ihoj2gqtsr32lcq"
+    }
+
+    var userPool = new AmazonCognitoIdentity.CognitoUserPool(poolData);
+    var userData = {
+        Username : user,
+        Pool : userPool
+    };
+
+    var cognitoUser = new AmazonCognitoIdentity.CognitoUser(userData);
+    cognitoUser.confirmRegistration(code, true, function(err, result) {
+        if (err) {
+            alert(err);
+            return;
+        }
+        console.log('call result: ' + result);
+        callback(result, true)
     });
 }
