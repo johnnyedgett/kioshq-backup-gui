@@ -1,22 +1,26 @@
 import React, { useEffect, useState } from 'react'
-import qs from 'query-string'
-import { getUserToken, validateToken } from '../../services/auth-service.js'
 import { setManifest, setPreviousKey, setCurrentKey } from '../../redux/actions/manifest-actions'
-import { pushKey, popKey } from '../../redux/actions/search-actions'
+import { pushKey, popKey, setActiveKey } from '../../redux/actions/search-actions'
+import { setLoading } from '../../redux/actions/flow-actions'
 import { setAuthenticated } from '../../redux/actions/auth-actions'
-import history from '../../util/history'
 import FileList from '../filelist/FileList'
 import { connect } from 'react-redux'
 import DetailsDrawer from '../detailsdrawer/DetailsDrawer'
 import FileDropzone from '../filedropzone/FileDropzone'
-import { Button } from '@material-ui/core';
-import Loading from '../loading/Loading.js';
+import { IconButton, Button, Snackbar } from '@material-ui/core';
+import { CloseIcon } from '@material-ui/icons/Close'
 import { createUserFolder } from '../../services/storage-service.js';
+import { getManifest } from '../../services/storage-service'
+import { setSnackbarMessage, setSnackbarVisible } from '../../redux/actions/snackbar-actions'
+import isEmpty from 'lodash.isempty'
+
+const prefixSource = "aws.cognito.identity-id.us-east-1:e710452b-401f-48d9-b673-1de1146855c1"
 
 const mapStateToProps = state => {
     return {
         manifest: state.manifest,
-        search: state.search
+        search: state.search,
+        snackbar: state.snackbar
     }
 }
 
@@ -25,9 +29,13 @@ const mapDispatchToProps = dispatch => {
         setFiles: (files) => dispatch(setManifest(files)),
         setPreviousKey: (key) => dispatch(setPreviousKey(key)),
         setCurrentKey: (key) => dispatch(setCurrentKey(key)),
+        setActiveKey: (key) => dispatch(setActiveKey(key)),
         setAuthenticated: (status) => dispatch(setAuthenticated(status)),
         pushKey: (key) => dispatch(pushKey(key)),
-        popKey: () => dispatch(popKey())
+        popKey: () => dispatch(popKey()),
+        setSnackbarMessage: (message) => dispatch(setSnackbarMessage(message)),
+        setSnackbarVisible: (visible) => dispatch(setSnackbarVisible(visible)),
+        setLoading: (loading) => dispatch(setLoading(loading))
     }
 }
 
@@ -39,38 +47,6 @@ function Homepage(props){
     const [newUser, setNewUser] = useState(false)
     const [buttonDisabled, setButtonDisabled] = useState(true)
 
-    useEffect(() => {
-        let query = qs.parse(props.location.search)
-
-        validateToken((success) => {
-            console.log("Validate token done.")
-            if(success) {
-                console.log("Validate token done and user is logged in.")
-
-                props.setAuthenticated(true)
-            } else if(query.code) {
-                console.log("Validate token done and user is NOT logged in. Checking their query code")
-
-                getUserToken(query.code, (success) => {
-                    if(success) { 
-                        console.log("Good query code. User is logged in")
-                        props.setAuthenticated(true)
-                    } else {
-                        console.log("BAD query code. User is NOT logged in")
-
-                        props.setAuthenticated(false)
-                        history.push("/login")
-                    }           
-                })
-            } else if(!query.code) {
-                console.log("No query code. User is not logged in")
-                props.setAuthenticated(false)
-                history.push("/login")
-            }
-        })
-        //eslint-disable-next-line
-    }, [])
-
     useEffect(()=> {
         if(newUser)
             createUserFolder(handleUserFolderResponse)
@@ -78,31 +54,53 @@ function Homepage(props){
 
     useEffect(() => {
         console.log("First Run: %O, New User: %O", firstRun, newUser)
-        if(firstRun === false && newUser === false){
+
+        if(firstRun === false && newUser === false)
             setButtonDisabled(false)
-        }
+
     }, [newUser, firstRun])
 
     const triggerReload = () => {
         setReload(!reload)
     }
 
-    const handleFirstRun = (status) => {
-        setFirstRun(status)
-    }
-
     const handleUserFolderResponse = (data, success) => {
-        if(success)
-        {
+        if(success) {
             setNewUser(false)
             setReload(!reload)
         }
-                  
     }
 
+    useEffect(() => {
+        let prefix = localStorage.getItem(prefixSource)
+        prefix = prefix+"/"
+        getManifest(prefix, (files, success, isNewUser) => {
+            if(success) { 
+                if(isNewUser) {
+                    setNewUser(true)
+                } else {
+                    props.setFiles(files)
+                    props.pushKey(files[0].Key)
+                    setFirstRun(false)
+                }
+            } else {
+                // TODO: ERROR HANDLING
+            }
+        })
+    }, [])
+
+    useEffect(() => {
+        if(!isEmpty(props.search.activeKey) && !firstRun) {
+            getManifest(props.search.activeKey, (files, success, isNewUser) => {
+                if(success) {
+                    props.setFiles(files)
+                }
+            })
+        }
+    }, [props.search, reload])
+
     return (
-    <div align="center" onDragOverCapture={() => setShowFilezone(true)}>
-            {firstRun?<Loading/>:<span/>}
+        <div align="center" onDragOverCapture={() => setShowFilezone(true)}>
             {showFilezone?
             <div style={{ 
                 paddingLeft: '20vw', 
@@ -117,10 +115,37 @@ function Homepage(props){
                 <FileList
                     reload={reload}
                     firstRun={firstRun}
-                    setFirstRun={handleFirstRun}
-                    newUser={newUser}
-                    setNewUser={setNewUser}/>
+                    newUser={newUser}/>
             <DetailsDrawer/>
+            <Snackbar
+                anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'left',
+                }}
+                open={props.snackbar.visible}
+                autoHideDuration={3000}
+                onClose={() => {
+                    props.setSnackbarVisible(false)
+                    props.setSnackbarMessage('')
+                }}
+                ContentProps={{
+                    'aria-describedby': 'message-id',
+                }}
+                message={<span id="message-id">{props.snackbar.message}</span>}
+                action={[
+                    <IconButton
+                      key="close"
+                      aria-label="close"
+                      color="inherit"
+                      onClick={() => {
+                        props.setSnackbarVisible(false)
+                        props.setSnackbarMessage('')
+                      }}
+                    >
+
+                      {/* <CloseIcon /> */}
+                    </IconButton>
+                  ]}/>
         </div>
     )
 }

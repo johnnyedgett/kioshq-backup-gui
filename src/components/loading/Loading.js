@@ -7,7 +7,8 @@ const useStyles = makeStyles({
         width: '100%',
         height: '100%',
         backgroundColor: '#000',
-        opacity: '0.5'
+        opacity: '0.5',
+        zIndex: 1
     }
 })
 

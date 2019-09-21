@@ -1,6 +1,7 @@
 import AWS from 'aws-sdk'
 import axios from 'axios'
 import isEmpty from 'lodash.isempty'
+import store from '../redux/store/store'
 
 const API_GATEWAY_URL = "https://3k2usm3hi3.execute-api.us-east-1.amazonaws.com/development"
 const idp = "us-east-1:e710452b-401f-48d9-b673-1de1146855c1"
@@ -44,7 +45,7 @@ export const getManifest = (prefix, callback) => {
             s3.listObjectsV2(params, (err, data) => {
                 if(err) {
                     console.error(err)
-                    callback(null, false)
+                    callback(null, false, false)
                 }
                 else {
                     console.log(data)
@@ -81,8 +82,9 @@ export const getS3Object = (key, callback) => {
             token = JSON.parse(localStorage.getItem("token")).id_token
         }
     }
-    if(!token) 
+    if(!token) {
         callback(null, false)
+    }
 
     let loginObject = localStorage.getItem("tokenType") === "idp"?{
         "cognito-idp.us-east-1.amazonaws.com/us-east-1_lrLPpNt41": token

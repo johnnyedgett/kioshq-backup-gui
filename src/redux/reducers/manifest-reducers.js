@@ -24,7 +24,6 @@ export default function manifest(state = initialState, action) {
                 files: tmp
             })
         case SET_SELECTED_ITEM:
-            console.log(action.payload)
             return Object.assign({}, state, {
                 selectedItem: action.payload
             })

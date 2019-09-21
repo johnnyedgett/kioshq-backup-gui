@@ -4,6 +4,7 @@ import { Menu } from '@material-ui/icons'
 import history from '../../util/history'
 import { connect } from 'react-redux'
 import { setAuthenticated } from '../../redux/actions/auth-actions'
+import { setSnackbarMessage, setSnackbarVisible } from '../../redux/actions/snackbar-actions'
 
 const useStyles = makeStyles({
     navtitle: {
@@ -13,15 +14,19 @@ const useStyles = makeStyles({
 
 const mapStateToProps = state => {
     return {
-        auth: state.auth
+        auth: state.auth,
+        snackbar: state.snackbar
     }
 }
 
 const mapDispatchToProps = dispatch => {
     return {
         setAuthenticated: (status) => dispatch(setAuthenticated(status)),
+        setSnackbarMessage: (message) => dispatch(setSnackbarMessage(message)),
+        setSnackbarVisible: (visible) => dispatch(setSnackbarVisible(visible))
     }
 }
+
 function Navbar(props) {
     const classes = useStyles()
     return (
@@ -41,7 +46,7 @@ function Navbar(props) {
                     <Button variant="text" onClick={() => { 
                         localStorage.clear();
                         props.setSnackbarMessage('Successfully signed out!')
-                        props.setSnackbarOpen(true)
+                        props.setSnackbarVisible(true)
                         history.push("/login")
                         props.setAuthenticated(false)
                     }}>

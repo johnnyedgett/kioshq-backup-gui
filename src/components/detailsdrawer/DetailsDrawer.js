@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Drawer, Button, makeStyles } from '@material-ui/core'
 import isEmpty from 'lodash.isempty'
 import { connect } from 'react-redux'
@@ -28,6 +28,16 @@ const mapDispatchToProps = dispatch => {
 
 function DetailsDrawer(props){
     const classes = useStyles()
+    const [name, setName] = useState('')
+
+    useEffect(() => {
+        let regex = /(.{1})\/(.*)/
+        if(!isEmpty(props.manifest.selectedItem)) {
+            console.log(props.manifest.selectedItem)
+            setName(props.manifest.selectedItem.Key.match(regex)[2])
+        }
+    }, [props.manifest])
+
     return (
         <Drawer
             open={!isEmpty(props.manifest.selectedItem)}
@@ -36,7 +46,7 @@ function DetailsDrawer(props){
                 <div
                     align="center"
                     className={classes.divStyle}>
-                    Viewing details for <b>{props.manifest.selectedItem.Key}</b>
+                    Viewing details for <b>{name}</b>
 
                     <br/>
                     <Button onClick={ () => props.setSelectedItem({}) }>Close Drawer</Button>

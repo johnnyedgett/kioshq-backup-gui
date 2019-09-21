@@ -5,6 +5,9 @@ import isEmpty from 'lodash.isempty'
 import { Link } from 'react-router-dom'
 import { loginUser } from '../../services/auth-service';
 import history from '../../util/history'
+import { setSnackbarMessage, setSnackbarVisible } from '../../redux/actions/snackbar-actions'
+import { setAuthenticated } from '../../redux/actions/auth-actions'
+import { connect } from 'react-redux'
 
 let url = "https://kios-gidp.auth.us-east-1.amazoncognito.com/login?response_type=code&client_id=2lhs1j0ndljittj7294mvd5dnp&redirect_uri=https://www.kioshq.com"
 
@@ -18,7 +21,21 @@ const useStyles = makeStyles({
         boxShadow: '0 0 0 0'
     }
 })
-export default function Login(props){
+
+const mapStateToProps = state => {
+    return {
+        snackbar: state.snackbar
+    }
+}
+
+const mapDispatchToProps = dispatch => {
+    return {
+        setSnackbarMessage: (message) => dispatch(setSnackbarMessage(message)),
+        setSnackbarVisible: (visible) => dispatch(setSnackbarVisible(visible)),
+        setAuthenticated: (authenticated) => dispatch(setAuthenticated(authenticated))
+    }
+}
+function Login(props){
     const classes = useStyles()
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
@@ -27,10 +44,10 @@ export default function Login(props){
 
     const handleUserLogin = (data, success) => {
         if(success) {
-            console.log('I have successfully authenticated the user. %O', data)
             setTimeout(() => {
                 props.setSnackbarMessage('Logged in! Sweet! 🎉')
-                props.setSnackbarOpen(true)
+                props.setSnackbarVisible(true)
+                props.setAuthenticated(true)
                 history.push("/")
             }, 1200)
         } else {
@@ -75,7 +92,6 @@ export default function Login(props){
                         <Button
                             disabled={(isEmpty(username) && isEmpty(password)) || loading}
                             onClick={() => {
-                                console.log('I need to sign this user in')
                                 setLoading(true)
                                 setError(false)
                                 loginUser({
@@ -99,3 +115,5 @@ export default function Login(props){
         </div>
     )
 }
+
+export default connect(mapStateToProps, mapDispatchToProps)(Login)

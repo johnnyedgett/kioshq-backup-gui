@@ -1,7 +1,8 @@
-import { PUSH_KEY, POP_KEY } from '../constants'
+import { PUSH_KEY, POP_KEY, SET_ACTIVE_KEY } from '../constants'
 
 const initialState = {
     history: [],
+    activeKey: ''
 }
 
 export default function search(state = initialState, action) {
@@ -11,13 +12,19 @@ export default function search(state = initialState, action) {
             tmp = state.history
             tmp.push(action.payload)
             return Object.assign({}, state, {
-                history: tmp
+                history: tmp,
+                activeKey: action.payload
             })
         case POP_KEY:
             tmp = state.history
             tmp.pop()
             return Object.assign({}, state, {
-                history: tmp
+                history: tmp,
+                activeKey: tmp[tmp.length-1]
+            })
+        case SET_ACTIVE_KEY:
+            return Object.assign({}, state, {
+                activeKey: action.payload
             })
         default:
             return state;
