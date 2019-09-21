@@ -11,7 +11,7 @@ import { setAuthenticated } from '../../redux/actions/auth-actions';
 const useStyles = makeStyles({
     divStyle: {
         paddingLeft: '20%',
-        paddingRight: '20%',
+        paddingRight: '20%'
     },
     tableStyle: {
         border: '1px solid grey'
@@ -56,7 +56,7 @@ function FileList(props) {
                     <CircularProgress variant="indeterminate"/>
                 </div>:
                 <div>
-                    
+
                     <Table
                         className={classes.tableStyle}>
                     <TableHead>

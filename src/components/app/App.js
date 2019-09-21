@@ -35,14 +35,25 @@ const mapDispatchToProps = dispatch => {
 
 function App(props){
     // Check if the user is authenticate
-    useEffect(() => {
-        validateToken(() => {
+    const [firstLoad, setFirstLoad] = useState(true)
 
+    useEffect(() => {
+        console.log("Authenticated props: %O", props.auth.authChecked)
+        validateToken((success) => {
+            if(success) {
+                props.setAuthenticated(true)
+                setFirstLoad(false)
+            } else {
+                setFirstLoad(false)
+            }
         })
     }, [])
 
     const ProtectedRoute = ({ isAllowed, ...props }) => 
-       isAllowed ? <Route {...props}/> : <Redirect to="/login"/>;
+    //    isAllowed ? <Route {...props}/> : <Redirect to="/login"/>;
+        firstLoad ?
+                <Loading/>
+                    : isAllowed ? <Route {...props}/> : <Redirect to="/login"/>
 
     const LoginContainer = () => (
         <div className="loginContainer">
@@ -94,7 +105,7 @@ function App(props){
                     }}/>
                 </Switch>
             </div>
-            {props.flow.loading?<Loading/>:<span/>}
+            {/* {props.flow.loading?<Loading/>:<span/>} */}
         </MuiThemeProvider>
     )
 }

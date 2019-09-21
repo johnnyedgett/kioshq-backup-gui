@@ -1,7 +1,8 @@
 import { SET_AUTHENTICATED } from '../constants'
 
 const initialState = {
-    authenticated: false
+    authenticated: false,
+    authChecked: false
 }
 
 export default function auth(state = initialState, action) {
@@ -9,7 +10,8 @@ export default function auth(state = initialState, action) {
         case SET_AUTHENTICATED:
             console.log("Authenticated? %O", action.payload)
             return Object.assign({}, state, {
-                authenticated: action.payload
+                authenticated: action.payload,
+                authChecked: true
             })
         default:
             return state;

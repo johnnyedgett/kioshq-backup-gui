@@ -14,7 +14,8 @@ let url = "https://kios-gidp.auth.us-east-1.amazoncognito.com/login?response_typ
 const useStyles = makeStyles({ 
     root: {
         paddingLeft: '30vw',
-        paddingRight: '30vw'
+        paddingRight: '30vw',
+        paddingTop: '20vh'
     },
     paper: {
         border: '1px solid #e7e7e7',
@@ -42,10 +43,7 @@ function Login(props){
     const [error, setError] = useState(false)
     const [loading, setLoading] = useState(false)
 
-    useEffect(() => {
-        console.log("Login props")
-        console.log(props)
-    }, [])
+    useEffect(() => { console.log("Before this") }, [])
     const handleUserLogin = (data, success) => {
         if(success) {
             setTimeout(() => {
@@ -96,6 +94,7 @@ function Login(props){
                         <Button
                             disabled={(isEmpty(username) && isEmpty(password)) || loading}
                             onClick={() => {
+                                localStorage.clear() // Just in case there is another user object in the localStorage
                                 setLoading(true)
                                 setError(false)
                                 loginUser({
