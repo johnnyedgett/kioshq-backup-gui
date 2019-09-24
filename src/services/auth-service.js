@@ -8,22 +8,34 @@ var AmazonCognitoIdentity = require('amazon-cognito-identity-js');
 
 let URL = "https://3k2usm3hi3.execute-api.us-east-1.amazonaws.com/development"
 
-export const getUserToken = (code, callback) => {
-    axios.get(`${URL}/auth/generate?code=${code}`)
+export const getUserToken = async (code) => {
+    return new Promise((resolve, reject) => {
+        console.log(`Calling ${URL}/auth/generate?code=${code}`)
+        axios.get(`${URL}/auth/generate?code=${code}`)
         .then(res=> { 
+            console.log(res)
             if(res.data.id_token){
                 localStorage.setItem('token', JSON.stringify(res.data))
                 localStorage.setItem("tokenType", "idp")
-                callback(true)
-            }  
+                resolve(true)
+            }  else {
+                resolve(false)
+            }
         })
         .catch(err => {
             console.error(err)
-            callback(false)
+            reject(false)
         })
+    })
 }
 
-export const validateToken = (callback) => {
+export const validateToken = async (query, callback) => {
+    if(query.code) {
+        let z = await getUserToken(query.code)
+        console.log("Success: %O", z)
+    }
+
+
     let token = localStorage.getItem("token")
 
     if(!isEmpty(token)) {
@@ -45,7 +57,21 @@ export const validateToken = (callback) => {
     axios.get(`${URL}/auth/validate?code=${token}`, { headers: { "authorizationToken": token } })
         .then(res => {
             if(res.data){ 
-                callback(true)
+                const idp = "us-east-1:e710452b-401f-48d9-b673-1de1146855c1"
+                let loginObject = localStorage.getItem("tokenType")==="idp"?{
+                    "cognito-idp.us-east-1.amazonaws.com/us-east-1_lrLPpNt41": token
+                }:{
+                    "cognito-idp.us-east-1.amazonaws.com/us-east-1_7fYzC9gB5": token
+                }
+                AWS.config.region = 'us-east-1'
+                AWS.config.credentials = new AWS.CognitoIdentityCredentials({
+                    IdentityPoolId: idp,
+                    Logins: loginObject
+                })
+                AWS.config.credentials.get((err)=>{ 
+                    if(err) console.error(err)
+                    else callback(true)
+                })
             } else {
                 localStorage.removeItem("token")
                 localStorage.removeItem("tokenType")

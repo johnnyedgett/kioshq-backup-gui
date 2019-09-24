@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
-import { createMuiTheme, MuiThemeProvider, Snackbar, IconButton } from '@material-ui/core'
-import CloseIcon from '@material-ui/icons/Close';
-import { Switch, Route, Link, Redirect } from 'react-router-dom'
+import { createMuiTheme, MuiThemeProvider } from '@material-ui/core'
+import qs from 'query-string'
+import { Switch, Route, Link, Redirect, withRouter } from 'react-router-dom'
 import Navbar from '../navbar/Navbar'
 import Homepage from '../homepage/Homepage'
 import Register from '../register/Register'
@@ -38,19 +38,21 @@ function App(props){
     const [firstLoad, setFirstLoad] = useState(true)
 
     useEffect(() => {
-        console.log("Authenticated props: %O", props.auth.authChecked)
-        validateToken((success) => {
+        let query = qs.parse(window.location.search)
+        console.log(query)
+        validateToken(query, (success) => {
             if(success) {
                 props.setAuthenticated(true)
+                console.log(" I called back to the App homepage" )
                 setFirstLoad(false)
             } else {
+                console.log("Not successfully authenticated")
                 setFirstLoad(false)
             }
         })
     }, [])
 
     const ProtectedRoute = ({ isAllowed, ...props }) => 
-    //    isAllowed ? <Route {...props}/> : <Redirect to="/login"/>;
         firstLoad ?
                 <Loading/>
                     : isAllowed ? <Route {...props}/> : <Redirect to="/login"/>
@@ -105,9 +107,8 @@ function App(props){
                     }}/>
                 </Switch>
             </div>
-            {/* {props.flow.loading?<Loading/>:<span/>} */}
         </MuiThemeProvider>
     )
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(App)
+export default connect(mapStateToProps, mapDispatchToProps)(withRouter(App))

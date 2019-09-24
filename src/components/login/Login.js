@@ -9,7 +9,7 @@ import { setSnackbarMessage, setSnackbarVisible } from '../../redux/actions/snac
 import { setAuthenticated } from '../../redux/actions/auth-actions'
 import { connect } from 'react-redux'
 
-let url = "https://kios-gidp.auth.us-east-1.amazoncognito.com/login?response_type=code&client_id=2lhs1j0ndljittj7294mvd5dnp&redirect_uri=https://www.kioshq.com"
+let url = "https://kios-gidp.auth.us-east-1.amazoncognito.com/login?response_type=code&client_id=2lhs1j0ndljittj7294mvd5dnp&redirect_uri=https://backup.kioshq.com"
 
 const useStyles = makeStyles({ 
     root: {

@@ -7,8 +7,7 @@ import FileList from '../filelist/FileList'
 import { connect } from 'react-redux'
 import DetailsDrawer from '../detailsdrawer/DetailsDrawer'
 import FileDropzone from '../filedropzone/FileDropzone'
-import { IconButton, Button, Snackbar, Dialog, DialogTitle } from '@material-ui/core';
-import { CloseIcon } from '@material-ui/icons/Close'
+import { IconButton, Button, Snackbar } from '@material-ui/core';
 import { createFolder, createUserFolder } from '../../services/storage-service.js';
 import { getManifest } from '../../services/storage-service'
 import { setSnackbarMessage, setSnackbarVisible } from '../../redux/actions/snackbar-actions'
