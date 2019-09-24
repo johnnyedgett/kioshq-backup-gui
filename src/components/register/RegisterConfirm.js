@@ -5,11 +5,15 @@ import { Link } from 'react-router-dom'
 import { confirmUser } from '../../services/auth-service';
 import qs from 'query-string'
 import history from '../../util/history'
+import { connect } from 'react-redux'
 
 const useStyles = makeStyles({ 
-    root: {
+    rootDesktop: {
         paddingLeft: '30vw',
         paddingRight: '30vw',
+        paddingTop: '20vh'
+    },
+    rootMobile: {
         paddingTop: '20vh'
     },
     paper: {
@@ -21,11 +25,19 @@ const useStyles = makeStyles({
     }
 })
 
-export default function Register(props){
+
+const mapStateToProps = state => {
+    return {
+        mobile: state.mobile
+    }
+}
+function RegisterConfirm(props){
     const classes = useStyles()
     const [code, setCode] = useState('')
     const [user, setUser] = useState('')
     const [showUserPrompt, setShowUserPrompt] = useState(false)
+    const [error, setError] = useState(false)
+    const [errorMessage, setErrorMessage] = useState('')
 
     const handleConfirmationResponse = (data, success) => {
         if(success) {
@@ -33,6 +45,9 @@ export default function Register(props){
                 pathname: '/login',
                 state: { confirmed: true }
             })
+        } else {
+            setError(true)
+            setErrorMessage(data.message)
         }
     }
 
@@ -48,7 +63,6 @@ export default function Register(props){
         } else {
             let userData = JSON.parse(localStorage.getItem("cu"))
             if(userData.username) {
-                console.log(userData.username)
                 setUser(userData.username)
             } else {
                 setShowUserPrompt(true)
@@ -57,7 +71,7 @@ export default function Register(props){
     }, [props.location])
 
     return (
-        <div align="center" className={classes.root}>
+        <div align="center" className={props.mobile.mobile?classes.rootMobile:classes.rootDesktop}>
             <Paper className={classes.paper}>
                 <br/>
                 <Grid container direction="column" justify="center" alignContent="center" alignItems="center" spacing={2}>
@@ -93,6 +107,7 @@ export default function Register(props){
                     </Grid>
                 </Grid>
                 <br/>
+                {error?<Typography variant="body1" color="error">{errorMessage}</Typography >:<span/>}
                 <br/>
                 <Link to="/register">Didn't receive a code?</Link>
                 <br/>
@@ -101,3 +116,5 @@ export default function Register(props){
         </div>
     )
 }
+
+export default connect(mapStateToProps, null)(RegisterConfirm)

@@ -196,7 +196,7 @@ export const confirmUser = (code, user, callback) => {
     var cognitoUser = new AmazonCognitoIdentity.CognitoUser(userData);
     cognitoUser.confirmRegistration(code, true, function(err, result) {
         if (err) {
-            alert(err);
+            callback(err, false)
             return;
         }
         console.log('call result: ' + result);

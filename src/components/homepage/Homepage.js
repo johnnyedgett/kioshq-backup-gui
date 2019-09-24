@@ -151,8 +151,8 @@ function Homepage(props){
             <DetailsDrawer/>
             <Snackbar
                 anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left',
+                    vertical: 'bottom',
+                    horizontal: 'left',
                 }}
                 open={props.snackbar.visible}
                 autoHideDuration={3000}

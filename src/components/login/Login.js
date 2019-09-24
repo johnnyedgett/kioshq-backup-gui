@@ -12,9 +12,12 @@ import { connect } from 'react-redux'
 let url = "https://kios-gidp.auth.us-east-1.amazoncognito.com/login?response_type=code&client_id=2lhs1j0ndljittj7294mvd5dnp&redirect_uri=https://backup.kioshq.com"
 
 const useStyles = makeStyles({ 
-    root: {
+    rootDesktop: {
         paddingLeft: '30vw',
         paddingRight: '30vw',
+        paddingTop: '20vh'
+    },
+    rootMobile: {
         paddingTop: '20vh'
     },
     paper: {
@@ -25,7 +28,8 @@ const useStyles = makeStyles({
 
 const mapStateToProps = state => {
     return {
-        snackbar: state.snackbar
+        snackbar: state.snackbar,
+        mobile: state.mobile
     }
 }
 
@@ -59,7 +63,7 @@ function Login(props){
     }
 
     return (
-        <div align="center" className={classes.root}>
+        <div align="center" className={props.mobile.mobile?classes.rootMobile:classes.rootDesktop}>
             <Paper
                 className={classes.paper}>
                 <br/>

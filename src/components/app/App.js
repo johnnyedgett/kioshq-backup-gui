@@ -9,6 +9,7 @@ import RegisterConfirm from '../register/RegisterConfirm'
 import Login from '../login/Login'
 import Loading from '../loading/Loading'
 import { setAuthenticated } from '../../redux/actions/auth-actions';
+import { setMobile } from '../../redux/actions/mobile-actions'
 import { connect } from 'react-redux'
 import { validateToken } from '../../services/auth-service'
 
@@ -23,13 +24,15 @@ const theme = createMuiTheme({
 const mapStateToProps = state => {
     return {
         auth: state.auth,
-        flow: state.flow
+        flow: state.flow,
+        mobile: state.mobile
     }
 }
 
 const mapDispatchToProps = dispatch => {
     return {
-        setAuthenticated: (status) => dispatch(setAuthenticated(status))
+        setAuthenticated: (status) => dispatch(setAuthenticated(status)),
+        setMobile: (status) => dispatch(setMobile(status))
     }
 }
 
@@ -52,6 +55,18 @@ function App(props){
         })
     }, [])
 
+    useEffect(() => {
+        window.addEventListener('resize', handleWindowResize)
+        handleWindowResize()
+    }, [])
+
+    useEffect(() => { console.log("Set mobile: %O", props.mobile.mobile)}, [props.mobile])
+
+    const handleWindowResize = () => {
+        window.innerWidth < 400?
+            props.setMobile(true) :
+            props.setMobile(false)
+    }
     const ProtectedRoute = ({ isAllowed, ...props }) => 
         firstLoad ?
                 <Loading/>

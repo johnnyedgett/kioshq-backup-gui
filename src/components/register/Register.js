@@ -4,11 +4,17 @@ import isEmpty from 'lodash.isempty'
 import { Link } from 'react-router-dom'
 import { registerUser } from '../../services/auth-service';
 import history from '../../util/history'
+import { connect } from 'react-redux'
+
+let url = "https://kios-gidp.auth.us-east-1.amazoncognito.com/login?response_type=code&client_id=2lhs1j0ndljittj7294mvd5dnp&redirect_uri=https://backup.kioshq.com"
 
 const useStyles = makeStyles({ 
-    root: {
+    rootDesktop: {
         paddingLeft: '30vw',
         paddingRight: '30vw',
+        paddingTop: '20vh'
+    },
+    rootMobile: {
         paddingTop: '20vh'
     },
     paper: {
@@ -20,7 +26,12 @@ const useStyles = makeStyles({
     }
 })
 
-export default function Register(props){
+const mapStateToProps = state => {
+    return {
+        mobile: state.mobile
+    }
+}
+function Register(props){
     const classes = useStyles()
     const [email, setEmail] = useState('')
     const [username, setUsername] = useState('')
@@ -30,7 +41,6 @@ export default function Register(props){
 
     const handleUserRegistered = (data, success) => {
         if(success) {
-            console.log("Successful: %O, Response: %O", success, data)
             localStorage.setItem("cu", JSON.stringify(data));
             history.push({
                 pathname: '/confirm',
@@ -43,7 +53,7 @@ export default function Register(props){
     }
 
     return (
-        <div align="center" className={classes.root}>
+        <div align="center" className={props.mobile.mobile?classes.rootMobile:classes.rootDesktop}>
             <Paper className={classes.paper}>
                 <br/>
                 <Grid container direction="column" justify="center" alignContent="center" alignItems="center" spacing={2}>
@@ -51,7 +61,7 @@ export default function Register(props){
                         <Typography>Register</Typography>
                     </Grid>
                     <Grid item>
-                        <Button>Register with Google</Button>
+                        <Button variant="contained" color="primary" href={`${url}`}>Register with Google</Button>
                     </Grid>
                     <Grid item>
                         <Typography variant="body2">or...</Typography>
@@ -90,7 +100,6 @@ export default function Register(props){
                         <Button
                             disabled={(isEmpty(username) && isEmpty(password))}
                             onClick={() => {
-                                console.log('I need to sign this user in')
                                 registerUser({
                                     email: email, username: username, password: password
                                 }, handleUserRegistered)
@@ -111,3 +120,5 @@ export default function Register(props){
         </div>
     )
 }
+
+export default connect(mapStateToProps, null)(Register)
