@@ -91,11 +91,14 @@ export const getS3Object = (key, callback) => {
     }:{
         "cognito-idp.us-east-1.amazonaws.com/us-east-1_7fYzC9gB5": token
     }
+    
     AWS.config.region = 'us-east-1'
+    
     AWS.config.credentials = new AWS.CognitoIdentityCredentials({
         IdentityPoolId: idp,
         Logins: loginObject
     })
+
     AWS.config.credentials.get((err) => {
         if(err) console.log('Error: %O', err)
         else {
@@ -245,7 +248,8 @@ export const createUserFolder = (callback) => {
 
     let userId = localStorage.getItem("aws.cognito.identity-id.us-east-1:e710452b-401f-48d9-b673-1de1146855c1")
     console.log(`I am going to call ${API_GATEWAY_URL}/auth/create?userId=${userId}`)
-    axios.get(`${API_GATEWAY_URL}/auth/create?userId=${userId}`, { headers: { "Authorization": token}})
+
+    axios.get(`${API_GATEWAY_URL}/auth/create?userId=${userId}`, { headers: { "Authorization": token } })
         .then(res => {
             console.log(res)
             if(res.status === 204)

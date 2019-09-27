@@ -56,8 +56,8 @@ function App(props){
     }, [])
 
     useEffect(() => {
-        window.addEventListener('resize', handleWindowResize)
-        handleWindowResize()
+        // window.addEventListener('resize', handleWindowResize)
+        // handleWindowResize()
     }, [])
 
     useEffect(() => { console.log("Set mobile: %O", props.mobile.mobile)}, [props.mobile])
